@@ -19,10 +19,12 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from myapp.views import upload_file, cleanup_files
+from myapp.views import upload_file, cleanup_files, analyze
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', upload_file, name='upload_file'),
-    path('cleanup/', cleanup_files, name='cleanup_files'),
+    path('', upload_file, name='index'),
+    path('upload/', upload_file, name='upload'),
+    path('analyze/', analyze, name='analyze'),
+    path('cleanup/', cleanup_files, name='cleanup'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
