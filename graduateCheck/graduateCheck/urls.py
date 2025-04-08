@@ -17,7 +17,12 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
+from myapp.views import upload_file, cleanup_files
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-]
+    path('admin/', admin.site.urls),
+    path('', upload_file, name='upload_file'),
+    path('cleanup/', cleanup_files, name='cleanup_files'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
