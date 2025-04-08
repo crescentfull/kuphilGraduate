@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">졸업요건 분석 결과</h3>
+            </div>
+            <div class="card-body">
+                {% if result.error %}
+                <div class="alert alert-danger">
+                    <h4 class="alert-heading">오류 발생</h4>
+                    <p>{{ result.error }}</p>
+                    <hr>
+                    <p class="mb-0">엑셀 파일의 형식을 확인해주세요. 필요한 컬럼: 학점, 과목명</p>
+                </div>
+                {% else %}
+                <div class="alert {% if result.status == '졸업가능' %}alert-success{% else %}alert-danger{% endif %}">
+                    <h4 class="alert-heading">현재 상태: {{ result.status }}</h4>
+                </div>
+
+                <h5>총 이수학점: {{ result.total_credits }}</h5>
+
+                {% if result.required_courses %}
+                <h5 class="mt-4">필수과목 이수 현황:</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>과목명</th>
+                                <th>이수구분</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in result.required_courses %}
+                            <tr>
+                                <td>{{ course.course_name }}</td>
+                                <td>{{ course.category }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                {% if result.missing_courses %}
+                <h5 class="mt-4">미이수 필수과목:</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>과목명</th>
+                                <th>이수구분</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in result.missing_courses %}
+                            <tr class="table-danger">
+                                <td>{{ course.course_name }}</td>
+                                <td>{{ course.category }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+                {% endif %}
+
+                <div class="d-grid gap-2 mt-4">
+                    <a href="/" class="btn btn-primary">새로운 파일 업로드</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
