@@ -18,6 +18,14 @@
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         
+                        <div class="mb-3">
+                            <label for="student_id" class="form-label">학번</label>
+                            <input type="text" class="form-control" id="student_id" name="student_id" 
+                                   pattern="\d{9}" maxlength="9" required
+                                   placeholder="예: 201110207 (9자리 숫자)">
+                            <div class="form-text">입학년도가 포함된 9자리 학번을 입력하세요.</div>
+                        </div>
+                        
                         <div class="mb-4">
                             <label class="form-label">학생 유형 선택</label>
                             <div class="form-check">

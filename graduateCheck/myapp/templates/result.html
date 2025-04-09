@@ -29,7 +29,7 @@
                             {% for key, value in result.details.items %}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 {{ key }}
-                                <span class="badge {% if value == '충족' %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                <span class="badge {% if '충족' in value %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
                                     {{ value }}
                                 </span>
                             </li>
@@ -48,7 +48,12 @@
                                         {% for course in courses %}
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                                 {{ course.course_name }}
-                                                <span class="badge bg-primary rounded-pill">{{ course.credits }}학점</span>
+                                                <div>
+                                                    {% if '지교' in course.original_type or course.original_type == '지정교양' %}
+                                                    <span class="badge bg-info me-2">지교</span>
+                                                    {% endif %}
+                                                    <span class="badge bg-primary rounded-pill">{{ course.credits }}학점</span>
+                                                </div>
                                             </li>
                                         {% endfor %}
                                     </ul>
