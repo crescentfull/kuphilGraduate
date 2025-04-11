@@ -24,7 +24,7 @@ class GraduationAnalyzer:
             '전선': '전공선택',
             '전필': '전공필수',
             '일선': '일반선택',
-            '심교': '심화교양'
+            '심교': '심화교양',
         }
 
     def analyze(self, df: pd.DataFrame, student_type: str, admission_year: int) -> Dict[str, Any]:
@@ -71,7 +71,7 @@ class GraduationAnalyzer:
         except Exception as e:
             return {
                 'error': str(e),
-                'status': '오류'
+                'status': '오류',
             }
             
     def _apply_course_name_mapping(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -107,6 +107,32 @@ class GraduationAnalyzer:
         
         print(f"유효한 총 이수학점: {valid_credits}")
         
+        # 과목별 학점 정보 저장
+        course_credits = {}
+        for _, row in df.iterrows():
+            course_name = row['course_name']
+            credits = row['credits']
+            course_credits[course_name] = credits
+            
+            # 매핑된 과목명에 대한 학점도 저장
+            for old_name, new_name in self.course_name_mapping.items():
+                if course_name == old_name:
+                    course_credits[new_name] = credits
+                elif course_name == new_name:
+                    course_credits[old_name] = credits
+        
+        # 과목 학점 조회 함수
+        def get_course_credit(course_name: str) -> int:
+            # 학술답사는 1학점
+            if '학술답사' in course_name:
+                return 1
+            # 데이터에서 찾은 학점이 있으면 사용
+            elif course_name in course_credits:
+                return course_credits[course_name]
+            # 기본값 3학점
+            else:
+                return 3
+        
         result = {
             'total_credits': valid_credits,
             'required_courses': {},
@@ -138,11 +164,19 @@ class GraduationAnalyzer:
             # 과목 목록 체크 (courses가 리스트인 경우)
             if isinstance(courses, list):
                 for course in courses:
+                    # 과목명 매핑
+                    course_name = course
+                    for old_name, new_name in self.course_name_mapping.items():
+                        if old_name == course:
+                            course_name = new_name
+                            break
+                    # 이수한 과목 검색 시 매핑된 이름으로 검색
                     course_data = df[
                         (df['course_name'].str.contains(course, case=False, na=False)) & 
                         (df['course_type'].isin(category_types))
                     ]
                     if not course_data.empty:
+                        # 이수
                         if category not in result['required_courses']:
                             result['required_courses'][category] = []
                         result['required_courses'][category].append({
@@ -151,12 +185,13 @@ class GraduationAnalyzer:
                             'credits': course_data['credits'].iloc[0]
                         })
                     else:
+                        # 미이수
                         if category not in result['missing_courses']:
                             result['missing_courses'][category] = []
                         result['missing_courses'][category].append({
                             'course_name': course,
                             'category': category,
-                            'credits': 3
+                            'credits': get_course_credit(course)
                         })
             # 수량 요건 체크 (courses가 숫자인 경우, 예: '지교': 5)
             elif isinstance(courses, int):
@@ -192,7 +227,7 @@ class GraduationAnalyzer:
                     result['missing_courses'][category].append({
                         'course_name': f'{category} 과목 {missing_count}개 더 필요',
                         'category': category,
-                        'credits': missing_count * 3  # 과목당 3학점으로 가정
+                        'credits': missing_count * get_course_credit(category)
                     })
                     
                     # 이수한 과목들은 required_courses에 추가
@@ -250,7 +285,7 @@ class GraduationAnalyzer:
                         'course_name': course,
                         'category': actual_category,
                         'credits': course_data['credits'].iloc[0],
-                        'original_type': course_data['course_type'].iloc[0]  # 원래 이수구분 추가
+                        'original_type': course_data['course_type'].iloc[0]
                     })
                 else:
                     if actual_category not in result['missing_courses']:
@@ -258,7 +293,7 @@ class GraduationAnalyzer:
                     result['missing_courses'][actual_category].append({
                         'course_name': course,
                         'category': actual_category,
-                        'credits': 3
+                        'credits': get_course_credit(course)
                     })
             
             # 전공 선택 필수 과목 체크 (2024년 요건)
@@ -299,7 +334,7 @@ class GraduationAnalyzer:
                             'course_name': course,
                             'category': actual_category,
                             'credits': course_data['credits'].iloc[0],
-                            'original_type': course_data['course_type'].iloc[0]  # 원래 이수구분 추가
+                            'original_type': course_data['course_type'].iloc[0]
                         })
                 
                 # 전공 선택 필수 과목 이수 여부 판단
@@ -316,7 +351,7 @@ class GraduationAnalyzer:
                     result['missing_courses']['전공선택'].append({
                         'course_name': missing_message,
                         'category': '전공선택',
-                        'credits': missing_count * 3
+                        'credits': missing_count * get_course_credit('전공선택')
                     })
                     
                     # 이수한 과목들은 required_courses에 추가
@@ -364,7 +399,7 @@ class GraduationAnalyzer:
                         'course_name': course,
                         'category': actual_category,
                         'credits': course_data['credits'].iloc[0],
-                        'original_type': course_data['course_type'].iloc[0]  # 원래 이수구분 추가
+                        'original_type': course_data['course_type'].iloc[0]
                     })
             
             # 전공기초 이수 여부 판단
@@ -381,7 +416,7 @@ class GraduationAnalyzer:
                 result['missing_courses']['전공기초'].append({
                     'course_name': missing_message,
                     'category': '전공기초',
-                    'credits': missing_count * 3
+                    'credits': missing_count * get_course_credit('전공기초')
                 })
                 
                 # 이수한 과목들은 required_courses에 추가
@@ -428,7 +463,7 @@ class GraduationAnalyzer:
                             'course_name': course,
                             'category': actual_category,
                             'credits': course_data['credits'].iloc[0],
-                            'original_type': course_data['course_type'].iloc[0]  # 원래 이수구분 추가
+                            'original_type': course_data['course_type'].iloc[0]
                         })
                 
                 # 전공선택 이수 여부 판단
@@ -445,7 +480,7 @@ class GraduationAnalyzer:
                     result['missing_courses']['전공선택'].append({
                         'course_name': missing_message,
                         'category': '전공선택',
-                        'credits': missing_count * 3
+                        'credits': missing_count * get_course_credit('전공선택')
                     })
                     
                     # 이수한 과목들은 required_courses에 추가
@@ -487,7 +522,7 @@ class GraduationAnalyzer:
                         result['missing_courses']['학술답사'].append({
                             'course_name': missing_message,
                             'category': '학술답사',
-                            'credits': missing_count * 1  # 학술답사는 1학점
+                            'credits': missing_count * get_course_credit('학술답사')
                         })
                         
                         # 이수한 과목들은 required_courses에 추가
