@@ -1,0 +1,62 @@
+
+{% block content %}
+<!-- 모달 대화상자 -->
+<div class="modal fade" id="cleanupModal" tabindex="-1" aria-labelledby="cleanupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="cleanupModalLabel">파일 정리 완료</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success mb-0">
+                    <h4 class="alert-heading">작업 완료!</h4>
+                    <p id="cleanupMessage">파일이 삭제되었습니다.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="homeButton">홈으로 이동</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const exitButton = document.getElementById('exitButton');
+        const homeButton = document.getElementById('homeButton');
+        const cleanupModal = new bootstrap.Modal(document.getElementById('cleanupModal'));
+        
+        // 종료 버튼 클릭 이벤트
+        exitButton.addEventListener('click', function() {
+            // cleanup URL 호출
+            fetch('/cleanup/', {
+                method: 'GET'
+            })
+            .then(response => response.text())
+            .then(html => {
+                // 응답에서 정리된 파일 수 추출
+                //const match = html.match(/총 (\d+)개의 임시 파일이 정리되었습니다/);
+                //const cleanedFiles = match ? match[1] : '0';
+                
+                // 모달에 메시지 설정
+                document.getElementById('cleanupMessage').textContent = 
+                    `파일이 삭제되었습니다.`;
+                
+                // 모달 표시
+                cleanupModal.show();
+            })
+            .catch(error => {
+                console.error('파일 정리 중 오류:', error);
+                alert('파일 정리 중 오류가 발생했습니다.');
+            });
+        });
+        
+        // 홈으로 이동 버튼 클릭 이벤트
+        homeButton.addEventListener('click', function() {
+            window.location.href = "{% url 'index' %}";
+        });
+    });
+</script>
+
+{% endblock %}

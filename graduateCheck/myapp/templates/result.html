@@ -88,10 +88,15 @@
 
                     <div class="text-center mt-4">
                         <a href="{% url 'index' %}" class="btn btn-primary">새로운 분석하기</a>
+                        <button id="exitButton" class="btn btn-danger">종료하기</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- 모달 대화상자 -->
+{% include 'cleanup.html' %}
+
 {% endblock %} 

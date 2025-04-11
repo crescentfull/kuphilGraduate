@@ -20,9 +20,11 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from myapp.views.graduation_check import analyze_graduation
+from myapp.views.file_management import cleanup_files
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', analyze_graduation, name='index'),
     path('analyze/', analyze_graduation, name='analyze'),
+    path('cleanup/', cleanup_files, name='cleanup'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
