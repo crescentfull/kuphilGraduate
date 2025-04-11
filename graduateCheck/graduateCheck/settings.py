@@ -132,3 +132,58 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ERROR_LOG
+# 로깅 설정 추가
+LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+
+# 로그 디렉토리가 없으면 생성
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'error_file': {
+        'level': 'ERROR',
+        'class': 'logging.handlers.RotatingFileHandler',
+        'filename': os.path.join(LOGS_DIR, 'error.log'),
+        'formatter': 'verbose',
+        'maxBytes': 10485760,  # 10MB
+        'backupCount': 5,      # 최대 5개 백업 파일 유지
+    },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['error_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'myapp': {
+            'handlers': ['error_file', 'console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
