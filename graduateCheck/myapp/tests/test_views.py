@@ -4,11 +4,8 @@ import numpy as np
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
-import os
-import tempfile
 import unittest.mock as mock
 from ..services.graduation.analyzer import GraduationAnalyzer
-from ..models.graduation_requirement import GraduationRequirementManager
 
 # 테스트용 데이터프레임 생성 함수
 def create_test_dataframe():
