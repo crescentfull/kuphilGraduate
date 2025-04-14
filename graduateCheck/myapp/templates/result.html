@@ -20,6 +20,13 @@
                     <div class="alert {% if result.status == '졸업가능' %}alert-success{% else %}alert-danger{% endif %}">
                         <h4 class="alert-heading">{{ result.status }}</h4>
                         <p>총 이수학점: {{ result.total_credits }}학점</p>
+                        {% if result.admission_year <= 2024 %}
+                        <p>인턴십 의무 이수제: 
+                            <span class="badge {% if result.internship_completed %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ result.internship_completed|yesno:"이수함,이수하지 않음" }}
+                            </span>
+                        </p>
+                        {% endif %}
                     </div>
 
                     {% if result.details %}

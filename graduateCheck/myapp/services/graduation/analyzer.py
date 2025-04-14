@@ -27,7 +27,7 @@ class GraduationAnalyzer:
             '심교': '심화교양',
         }
 
-    def analyze(self, df: pd.DataFrame, student_type: str, admission_year: int) -> Dict[str, Any]:
+    def analyze(self, df: pd.DataFrame, student_type: str, admission_year: int, internship_completed: str = 'no') -> Dict[str, Any]:
         """졸업요건 분석 수행"""
         try:
             # 0. 원본 데이터의 총 학점 합계 확인
@@ -65,6 +65,15 @@ class GraduationAnalyzer:
             
             # 6. 입학년도 정보 추가
             result['admission_year'] = admission_year
+            
+            # 7. 인턴십 이수 여부 추가
+            result['internship_completed'] = internship_completed == 'yes'
+            
+            # 8. 2024학번까지는 인턴십 이수 여부 확인
+            if admission_year <= 2024 and not result['internship_completed']:
+                result['status'] = '미달'
+                result['missing_requirements'] = result.get('missing_requirements', [])
+                result['missing_requirements'].append('인턴십 미이수')
             
             return result
             
