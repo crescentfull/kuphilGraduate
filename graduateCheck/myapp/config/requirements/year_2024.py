@@ -18,7 +18,11 @@ class Requirements2024(BaseRequirements):
         '논리학',
         '서양철학고전읽기',
         '동양철학고전읽기',
-        '서양고중세철학',  # 서양고대철학
+        '서양고중세철학'  # 서양고대철학
+    ]
+    
+    # 학술답사 과목
+    FIELD_TRIP = [
         '학술답사Ⅰ',
         '학술답사Ⅱ',
         '학술답사Ⅲ'
@@ -46,17 +50,14 @@ class Requirements2024(BaseRequirements):
             'major_elective_required': MAJOR_ELECTIVE_REQUIRED,
             'major_elective_min': MAJOR_ELECTIVE_MIN,
             'internship_required': INTERNSHIP_REQUIRED,
-            'field_trip_min': 2  # 학술답사 최소 이수 과목 수
+            'field_trip': FIELD_TRIP,
+            'field_trip_min': 1  # 학술답사 최소 이수 과목 수
         },
         'transfer': {
             'total_credits': 65,
             'common_required': {},
             'major_required': ['서양고중세철학'],
-            'major_elective_required': [
-                '학술답사Ⅰ',
-                '학술답사Ⅱ',
-                '학술답사Ⅲ'
-            ],
+            'major_elective_required': MAJOR_ELECTIVE_REQUIRED,
             'major_elective_min': 1,  # 학술답사 중 1개 이상
             'major_elective_courses': [  # 전공 선택 과목 (5개 중 3개 이상)
                 '중국철학의이해',
@@ -68,6 +69,8 @@ class Requirements2024(BaseRequirements):
                 '중국유학'  # 유가철학
             ],
             'major_elective_courses_min': 3,
+            'field_trip': FIELD_TRIP,
+            'field_trip_min': 1,
             'internship_required': False
         },
         'double': {

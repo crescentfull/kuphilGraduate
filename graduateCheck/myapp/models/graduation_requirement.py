@@ -4,12 +4,6 @@ from ..config.requirements.year_2024 import Requirements2024
 from ..config.requirements.year_2025 import Requirements2025
 
 @dataclass
-class CourseRequirement:
-    course_name: str
-    credits: int
-    category: str
-
-@dataclass
 class YearRequirement:
     year: int
     common_required: Dict[str, List[str]]
@@ -17,6 +11,8 @@ class YearRequirement:
     major_elective_min: int
     total_credits: int
     internship_required: bool = False
+    field_trip: List[str] = None
+    field_trip_min: int = 0
 
 class GraduationRequirementManager:
     def __init__(self):

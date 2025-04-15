@@ -19,6 +19,7 @@ class GraduationAnalyzer:
         self.course_type_mapping = {
             '기교': '기초교양',
             '핵교': '핵심교양',
+            '핵교': '심교',
             '일교': '일반교양',
             '지교': '지정교양',
             '전선': '전공선택',
@@ -61,13 +62,14 @@ class GraduationAnalyzer:
                 raise ValueError("해당하는 졸업요건을 찾을 수 없습니다.")
             
             # 5. 요건 분석
-            result = self._analyze_requirements(df, requirement, student_type)
+            result = self._analyze_requirements(df, requirement, student_type, admission_year, internship_completed)
             
             # 6. 입학년도 정보 추가
             result['admission_year'] = admission_year
             
             # 7. 인턴십 이수 여부 추가
             result['internship_completed'] = internship_completed == 'yes'
+            print(f"인턴십 이수 여부: {result['internship_completed']}")
             
             # 8. 2024학번까지는 인턴십 이수 여부 확인
             if admission_year <= 2024 and not result['internship_completed']:
@@ -106,7 +108,7 @@ class GraduationAnalyzer:
             
         return df
 
-    def _analyze_requirements(self, df: pd.DataFrame, requirement: Any, student_type: str) -> Dict[str, Any]:
+    def _analyze_requirements(self, df: pd.DataFrame, requirement: Any, student_type: str, admission_year: int, internship_completed: str = 'no') -> Dict[str, Any]:
         """졸업요건 상세 분석"""
         # 총 이수학점 계산 (F 학점이나 취득학점포기 과목 제외)
         valid_credits = df[
@@ -142,6 +144,16 @@ class GraduationAnalyzer:
             else:
                 return 3
         
+        # 과목명 표시 함수
+        def get_display_course_name(course_name: str) -> str:
+            # 매핑된 과목인 경우 원래 과목명을 괄호 안에 표시
+            for old_name, new_name in self.course_name_mapping.items():
+                if course_name == new_name:
+                    return f"{new_name}(전 {old_name})"
+                elif course_name == old_name:
+                    return f"{new_name}(전 {old_name})"
+            return course_name
+        
         result = {
             'total_credits': valid_credits,
             'required_courses': {},
@@ -149,7 +161,7 @@ class GraduationAnalyzer:
             'status': '미졸업',
             'details': {}
         }
-
+        
         # 공통 필수 과목 체크
         common_required = requirement.REQUIREMENTS[student_type]['common_required']
         for category, courses in common_required.items():
@@ -189,7 +201,7 @@ class GraduationAnalyzer:
                         if category not in result['required_courses']:
                             result['required_courses'][category] = []
                         result['required_courses'][category].append({
-                            'course_name': course,
+                            'course_name': get_display_course_name(course),
                             'category': category,
                             'credits': course_data['credits'].iloc[0]
                         })
@@ -198,7 +210,7 @@ class GraduationAnalyzer:
                         if category not in result['missing_courses']:
                             result['missing_courses'][category] = []
                         result['missing_courses'][category].append({
-                            'course_name': course,
+                            'course_name': get_display_course_name(course),
                             'category': category,
                             'credits': get_course_credit(course)
                         })
@@ -218,7 +230,7 @@ class GraduationAnalyzer:
                     
                     for _, row in category_courses.iterrows():
                         result['required_courses'][category].append({
-                            'course_name': row['course_name'],
+                            'course_name': get_display_course_name(row['course_name']),
                             'category': category,
                             'credits': row['credits'],
                             'original_type': row['course_type']
@@ -246,7 +258,7 @@ class GraduationAnalyzer:
                         
                         for _, row in category_courses.iterrows():
                             result['required_courses'][category].append({
-                                'course_name': row['course_name'],
+                                'course_name': get_display_course_name(row['course_name']),
                                 'category': category,
                                 'credits': row['credits'],
                                 'original_type': row['course_type']
@@ -291,7 +303,7 @@ class GraduationAnalyzer:
                     if actual_category not in result['required_courses']:
                         result['required_courses'][actual_category] = []
                     result['required_courses'][actual_category].append({
-                        'course_name': course,
+                        'course_name': get_display_course_name(course),
                         'category': actual_category,
                         'credits': course_data['credits'].iloc[0],
                         'original_type': course_data['course_type'].iloc[0]
@@ -300,7 +312,7 @@ class GraduationAnalyzer:
                     if actual_category not in result['missing_courses']:
                         result['missing_courses'][actual_category] = []
                     result['missing_courses'][actual_category].append({
-                        'course_name': course,
+                        'course_name': get_display_course_name(course),
                         'category': actual_category,
                         'credits': get_course_credit(course)
                     })
@@ -340,7 +352,7 @@ class GraduationAnalyzer:
                     
                     if not course_data.empty:
                         completed_electives.append({
-                            'course_name': course,
+                            'course_name': get_display_course_name(course),
                             'category': actual_category,
                             'credits': course_data['credits'].iloc[0],
                             'original_type': course_data['course_type'].iloc[0]
@@ -368,9 +380,74 @@ class GraduationAnalyzer:
                         if '전공선택' not in result['required_courses']:
                             result['required_courses']['전공선택'] = []
                         result['required_courses']['전공선택'].extend(completed_electives)
+            
+            # 학술답사 체크 (2024년 요건)
+            if 'field_trip' in requirement.REQUIREMENTS[student_type] and requirement.REQUIREMENTS[student_type]['field_trip']:
+                field_trip = requirement.REQUIREMENTS[student_type]['field_trip']
+                field_trip_min = requirement.REQUIREMENTS[student_type]['field_trip_min']
+                
+                completed_field_trips = []
+                for course in field_trip:
+                    # 과목명 매핑 적용
+                    course_name = course
+                    for old_name, new_name in self.course_name_mapping.items():
+                        if old_name == course:
+                            course_name = new_name
+                            break
+                    
+                    # 정확한 과목명 매칭 사용
+                    course_data = df[
+                        (df['course_name'] == course_name) & 
+                        (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필']))
+                    ]
+                    
+                    if not course_data.empty:
+                        completed_field_trips.append({
+                            'course_name': get_display_course_name(course),
+                            'category': '학술답사',
+                            'credits': course_data['credits'].iloc[0]
+                        })
+                
+                # 학술답사 이수 여부 판단
+                if len(completed_field_trips) >= field_trip_min:
+                    if '학술답사' not in result['required_courses']:
+                        result['required_courses']['학술답사'] = []
+                    result['required_courses']['학술답사'].extend(completed_field_trips)
+                else:
+                    # 2024학번의 경우, 학술답사 1개 + 인턴십으로도 충족 가능
+                    if (admission_year <= 2024 and 
+                        len(completed_field_trips) == 1 and 
+                        result.get('internship_completed', False)):
+                        print(f"학술답사 1개 + 인턴십으로 요건 충족")
+                        if '학술답사' not in result['required_courses']:
+                            result['required_courses']['학술답사'] = []
+                        result['required_courses']['학술답사'].extend(completed_field_trips)
+                        result['required_courses']['학술답사'].append({
+                            'course_name': '인턴십',
+                            'category': '학술답사',
+                            'credits': 0
+                        })
+                    else:
+                        if field_trip_min > 0:
+                            missing_count = field_trip_min - len(completed_field_trips)
+                            missing_message = f"학술답사 {missing_count}개 더 이수 필요"
+                            
+                            if '학술답사' not in result['missing_courses']:
+                                result['missing_courses']['학술답사'] = []
+                            result['missing_courses']['학술답사'].append({
+                                'course_name': missing_message,
+                                'category': '학술답사',
+                                'credits': missing_count * get_course_credit('학술답사')
+                            })
+                            
+                            # 이수한 과목들은 required_courses에 추가
+                            if completed_field_trips:
+                                if '학술답사' not in result['required_courses']:
+                                    result['required_courses']['학술답사'] = []
+                                result['required_courses']['학술답사'].extend(completed_field_trips)
         
         # 2025년 요건 처리
-        if 'major_base' in requirement.REQUIREMENTS[student_type]:
+        if admission_year >= 2025 and 'major_base' in requirement.REQUIREMENTS[student_type]:
             # 전공기초 과목 체크
             major_base = requirement.REQUIREMENTS[student_type]['major_base']
             major_base_min = requirement.REQUIREMENTS[student_type]['major_base_min']
@@ -387,7 +464,7 @@ class GraduationAnalyzer:
                 # 지정교양으로 이수해도 인정되는 전공기초 과목인 경우
                 if course in major_base_as_designated:
                     course_data = df[
-                        (df['course_name'].str.contains(course, case=False, na=False)) & 
+                        (df['course_name'] == course) & 
                         (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필', '지정교양', '지교']))
                     ]
                     
@@ -398,14 +475,14 @@ class GraduationAnalyzer:
                 else:
                     # 일반적인 전공 과목 체크
                     course_data = df[
-                        (df['course_name'].str.contains(course, case=False, na=False)) & 
+                        (df['course_name'] == course) & 
                         (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필']))
                     ]
                     actual_category = '전공기초'
                 
                 if not course_data.empty:
                     completed_base.append({
-                        'course_name': course,
+                        'course_name': get_display_course_name(course),
                         'category': actual_category,
                         'credits': course_data['credits'].iloc[0],
                         'original_type': course_data['course_type'].iloc[0]
@@ -451,7 +528,7 @@ class GraduationAnalyzer:
                     # 지정교양으로 이수해도 인정되는 전공선택 과목인 경우
                     if course in major_elective_as_designated:
                         course_data = df[
-                            (df['course_name'].str.contains(course, case=False, na=False)) & 
+                            (df['course_name'] == course) & 
                             (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필', '지정교양', '지교']))
                         ]
                         
@@ -462,14 +539,14 @@ class GraduationAnalyzer:
                     else:
                         # 일반적인 전공선택 과목 체크
                         course_data = df[
-                            (df['course_name'].str.contains(course, case=False, na=False)) & 
+                            (df['course_name'] == course) & 
                             (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필']))
                         ]
                         actual_category = '전공선택'
                     
                     if not course_data.empty:
                         completed_electives.append({
-                            'course_name': course,
+                            'course_name': get_display_course_name(course),
                             'category': actual_category,
                             'credits': course_data['credits'].iloc[0],
                             'original_type': course_data['course_type'].iloc[0]
@@ -505,13 +582,14 @@ class GraduationAnalyzer:
                 
                 completed_field_trips = []
                 for course in field_trip:
+                    # 정확한 과목명 매칭 사용
                     course_data = df[
-                        (df['course_name'].str.contains(course, case=False, na=False)) & 
+                        (df['course_name'] == course) & 
                         (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필']))
                     ]
                     if not course_data.empty:
                         completed_field_trips.append({
-                            'course_name': course,
+                            'course_name': get_display_course_name(course),
                             'category': '학술답사',
                             'credits': course_data['credits'].iloc[0]
                         })
@@ -545,4 +623,4 @@ class GraduationAnalyzer:
             len(result['missing_courses']) == 0):
             result['status'] = '졸업가능'
 
-        return result 
+        return result
