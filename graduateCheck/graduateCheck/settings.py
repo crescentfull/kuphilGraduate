@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
+import ast
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -26,10 +27,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
-
+raw_hosts = os.getenv("ALLOWED_HOSTS")
+ALLOWED_HOSTS = ast.literal_eval(raw_hosts)
 
 # Application definition
 
