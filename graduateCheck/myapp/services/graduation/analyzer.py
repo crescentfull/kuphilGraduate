@@ -385,6 +385,11 @@ class GraduationAnalyzer:
             if 'field_trip' in requirement.REQUIREMENTS[student_type] and requirement.REQUIREMENTS[student_type]['field_trip']:
                 field_trip = requirement.REQUIREMENTS[student_type]['field_trip']
                 field_trip_min = requirement.REQUIREMENTS[student_type]['field_trip_min']
+                internship_required = requirement.REQUIREMENTS[student_type].get('internship_required', False)
+                
+                # 인턴십 의무가 있는 경우, 학술답사 최소 이수 과목 수를 1로 간주
+                if internship_required:
+                    field_trip_min = 1
                 
                 completed_field_trips = []
                 for course in field_trip:
@@ -410,6 +415,8 @@ class GraduationAnalyzer:
                 
                 # 학술답사 이수 여부 판단
                 if len(completed_field_trips) >= field_trip_min:
+                    # 학술답사 2개 이상 이수한 경우 또는 인턴십 의무가 있는 경우 1개 이수한 경우
+                    print(f"학술답사 {len(completed_field_trips)}개 이수로 요건 충족")
                     if '학술답사' not in result['required_courses']:
                         result['required_courses']['학술답사'] = []
                     result['required_courses']['학술답사'].extend(completed_field_trips)
@@ -417,7 +424,7 @@ class GraduationAnalyzer:
                     # 2024학번의 경우, 학술답사 1개 + 인턴십으로도 충족 가능
                     if (admission_year <= 2024 and 
                         len(completed_field_trips) == 1 and 
-                        result.get('internship_completed', False)):
+                        internship_completed == 'yes'):
                         print(f"학술답사 1개 + 인턴십으로 요건 충족")
                         if '학술답사' not in result['required_courses']:
                             result['required_courses']['학술답사'] = []

@@ -51,7 +51,7 @@ class Requirements2024(BaseRequirements):
             'major_elective_min': MAJOR_ELECTIVE_MIN,
             'internship_required': INTERNSHIP_REQUIRED,
             'field_trip': FIELD_TRIP,
-            'field_trip_min': 1  # 학술답사 최소 이수 과목 수
+            'field_trip_min': 2  # 학술답사 최소 이수 과목 수
         },
         'transfer': {
             'total_credits': 65,
