@@ -136,9 +136,9 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
             f_grade_count = new_df[new_df['grade'].isin(['F', 'NP'])].shape[0]
             print(f"F/NP 학점 과목 수: {f_grade_count}")
             
-            # F 학점 과목 제외
-            new_df = new_df[~new_df['grade'].isin(['F', 'NP'])].copy()
-            print(f"F/NP 학점 {f_grade_count}개 과목 제외됨")
+            # # F 학점 과목 제외
+            # new_df = new_df[~new_df['grade'].isin(['F', 'NP'])].copy()
+            # print(f"F/NP 학점 {f_grade_count}개 과목 제외됨")
         
         # 결측치 제거
         na_count_before = len(new_df)

@@ -45,6 +45,7 @@
                     </div>
                     {% endif %}
 
+                    <!-- 이수한 필수 과목 목록 -->
                     <div class="mb-4">
                         <h5 class="text-success">이수한 필수 과목</h5>
                         {% if result.required_courses %}
@@ -71,6 +72,37 @@
                         {% endif %}
                     </div>
 
+                    <!-- F학점 과목 목록 섹션 추가 -->
+                    <div class="mb-4">
+                        <h5 class="text-warning">F학점 취득 과목</h5>
+                        {% if result.f_grade_courses %}
+                            <div class="alert alert-warning">
+                                <ul class="list-group">
+                                    {% for course in result.f_grade_courses %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center bg-warning bg-opacity-10">
+                                            <div>
+                                                <span class="text-warning">{{ course.course_name }}</span>
+                                                <small class="text-muted ms-2">
+                                                    ({{ course.year }}학년도 {{ course.semester }})
+                                                </small>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-warning text-dark me-2">{{ course.grade }}</span>
+                                                <span class="badge bg-secondary">{{ course.credits }}학점</span>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                <div class="mt-2 text-warning">
+                                    <small>* 위 과목들은 졸업요건 분석에서 제외되었습니다.</small>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">F학점 취득 과목이 없습니다.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- 미이수 필수 과목 목록 -->
                     <div class="mb-4">
                         <h5 class="text-danger">미이수 필수 과목</h5>
                         {% if result.missing_courses %}
