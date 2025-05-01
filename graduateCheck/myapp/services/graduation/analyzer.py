@@ -38,6 +38,19 @@ class GraduationAnalyzer:
             # 1. 데이터 정제
             df = clean_dataframe(df)
             
+            # F학점 과목 추출
+            f_grade_courses = []
+            if 'grade' in df.columns:
+                f_df = df[df['grade'].isin(['F', 'NP'])]
+                for _, row in f_df.iterrows():
+                    f_grade_courses.append({
+                        'course_name': row['course_name'],
+                        'year': row.get('year', ''),         # 연도 컬럼이 있으면
+                        'semester': row.get('semester', ''), # 학기 컬럼이 있으면
+                        'grade': row['grade'],
+                        'credits': row['credits'],
+                    })
+            
             # 1.5 정제 후 총 학점 확인
             cleaned_total_credits = df['credits'].sum()
             print(f"정제 후 총 학점: {cleaned_total_credits}")
@@ -76,6 +89,8 @@ class GraduationAnalyzer:
                 result['status'] = '미달'
                 result['missing_requirements'] = result.get('missing_requirements', [])
                 result['missing_requirements'].append('인턴십 미이수')
+            
+            result['f_grade_courses'] = f_grade_courses
             
             return result
             
@@ -403,7 +418,8 @@ class GraduationAnalyzer:
                     # 정확한 과목명 매칭 사용
                     course_data = df[
                         (df['course_name'] == course_name) & 
-                        (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필']))
+                        (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필'])) &
+                        (~df['grade'].isin(['F', 'NP']))
                     ]
                     
                     if not course_data.empty:
