@@ -26,6 +26,9 @@ class GraduationAnalyzer:
             '전필': '전공필수',
             '일선': '일반선택',
             '심교': '심화교양',
+            '다선': '다전공선택',
+            '다지': '다전공지교',
+            '다필': '다전공필수',
         }
 
     def analyze(self, df: pd.DataFrame, student_type: str, admission_year: int, internship_completed: str = 'no') -> Dict[str, Any]:
