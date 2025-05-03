@@ -29,21 +29,23 @@
                         {% endif %}
                     </div>
 
-                    {% if result.details %}
+                    {% comment %} 
                     <div class="mb-4">
                         <h5>세부 요건 현황</h5>
                         <ul class="list-group">
-                            {% for key, value in result.details.items %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                {{ key }}
-                                <span class="badge {% if '충족' in value %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
-                                    {{ value }}
-                                </span>
-                            </li>
-                            {% endfor %}
+                            {% if result.details %}
+                                {% for key, value in result.details.items %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ key }}
+                                    <span class="badge {% if '충족' in value %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                        {{ value }}
+                                    </span>
+                                </li>
+                                {% endfor %}
+                            {% endif %}
                         </ul>
                     </div>
-                    {% endif %}
+ {% endcomment %}
 
                     <!-- 이수한 필수 과목 목록 -->
                     <div class="mb-4">
@@ -51,11 +53,26 @@
                         {% if result.required_courses %}
                             {% for category, courses in result.required_courses.items %}
                                 <div class="mb-3">
-                                    <h6 class="text-muted">{{ category }}</h6>
+                                    <h6 class="text-muted"> 
+                                        {{ category }} 
+
+                                        {% if category == '지정교양' or category == '지교' %}
+                                        {% for key, value in result.details.items %}
+                                        
+                                            {% if key == category %}
+                                                <span class="badge bg-warning text-dark ms-2">
+                                                    이수 현황: {{ result.completed_courses|length }}/{{ result.required_courses_count }} 과목
+                                                </span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% endif %}
+                                    </h6>
                                     <ul class="list-group">
                                         {% for course in courses %}
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                {{ course.course_name }}
+                                                <div class="d-flex align-items-center">
+                                                    {{ course.course_name }}
+                                                </div>
                                                 <div>
                                                     {% if '지교' in course.original_type or course.original_type == '지정교양' %}
                                                     <span class="badge bg-info me-2">지교</span>
