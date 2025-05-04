@@ -456,7 +456,7 @@ class GraduationAnalyzer:
             # F학점 과목 추출
             f_grade_courses = []
             if 'grade' in df.columns:
-                f_df = df[df['grade'].isin(['F', 'NP'])]
+                f_df = df[df['grade'].isin(['F', 'N'])]
                 for _, row in f_df.iterrows():
                     f_grade_courses.append({
                         'course_name': row['course_name'],
