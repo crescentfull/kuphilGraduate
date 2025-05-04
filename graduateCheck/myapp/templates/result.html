@@ -29,7 +29,6 @@
                         {% endif %}
                     </div>
 
-                    {% comment %} 
                     <div class="mb-4">
                         <h5>세부 요건 현황</h5>
                         <ul class="list-group">
@@ -45,7 +44,6 @@
                             {% endif %}
                         </ul>
                     </div>
- {% endcomment %}
 
                     <!-- 이수한 필수 과목 목록 -->
                     <div class="mb-4">
@@ -55,17 +53,6 @@
                                 <div class="mb-3">
                                     <h6 class="text-muted"> 
                                         {{ category }} 
-
-                                        {% if category == '지정교양' or category == '지교' %}
-                                        {% for key, value in result.details.items %}
-                                        
-                                            {% if key == category %}
-                                                <span class="badge bg-warning text-dark ms-2">
-                                                    이수 현황: {{ result.completed_courses|length }}/{{ result.required_courses_count }} 과목
-                                                </span>
-                                            {% endif %}
-                                        {% endfor %}
-                                        {% endif %}
                                     </h6>
                                     <ul class="list-group">
                                         {% for course in courses %}
@@ -119,7 +106,6 @@
                         {% endif %}
                     </div>
 
-                    <!-- 미이수 필수 과목 목록 -->
                     <div class="mb-4">
                         <h5 class="text-danger">미이수 필수 과목</h5>
                         {% if result.missing_courses %}
@@ -140,8 +126,9 @@
                             <p class="text-muted">미이수 필수 과목이 없습니다.</p>
                         {% endif %}
                     </div>
-                    {% endif %}
+                    {% endif%}
 
+                    <!-- 하단 버튼 추가 -->
                     <div class="text-center mt-4">
                         <a href="{% url 'index' %}" class="btn btn-primary">새로운 분석하기</a>
                         <button id="exitButton" class="btn btn-danger">종료하기</button>
