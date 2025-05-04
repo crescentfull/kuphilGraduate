@@ -19,7 +19,6 @@ class GraduationAnalyzer:
         self.course_type_mapping = {
             '기교': '기초교양',
             '핵교': '핵심교양',
-            # '핵교': '심교',
             '일교': '일반교양',
             '지교': '지정교양',
             '지필': '지정교양필수',
