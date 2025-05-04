@@ -51,18 +51,20 @@
                         {% if result.required_courses %}
                             {% for category, courses in result.required_courses.items %}
                                 <div class="mb-3">
-                                    <h6 class="text-muted"> 
-                                        {{ category }} 
-                                    </h6>
+                                    <h6 class="text-muted">{{ category }}</h6>
                                     <ul class="list-group">
                                         {% for course in courses %}
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                                 <div class="d-flex align-items-center">
                                                     {{ course.course_name }}
+                                                    {% if category == '지교' and '전공' in course.original_type %}
+                                                        <span class="badge bg-success ms-2">전공인정</span>
+                                                    {% endif %}
+                                                    <small class="text-muted ms-2">({{ course.original_type }})</small>
                                                 </div>
                                                 <div>
-                                                    {% if '지교' in course.original_type or course.original_type == '지정교양' %}
-                                                    <span class="badge bg-info me-2">지교</span>
+                                                    {% if category == '지교' %}
+                                                        <span class="badge bg-info me-2">지교</span>
                                                     {% endif %}
                                                     <span class="badge bg-primary rounded-pill">{{ course.credits }}학점</span>
                                                 </div>

@@ -105,101 +105,158 @@ class CommonRequiredAnalyzer:
 class MajorRequiredAnalyzer:
     def __init__(self, course_name_mapping):
         self.course_name_mapping = course_name_mapping
+    
+    def _process_course(self, course, is_designated, df, context, result):
+        """
+        과목 처리 공통 로직을 추출한 헬퍼 함수
+        is_designated: 지교로 이수 가능한 과목인지 여부
+        """
+        if is_designated: # 필수 지교 판별
+            course_data = df[
+                (df['course_name'].str.contains(course, case=False, na=False)) &
+                (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필', '지정교양', '지교']))
+            ]
+            if not course_data.empty and course_data['course_type'].iloc[0] in ['지정교양', '지교']: # 지교로 이수 했는지 판별
+                actual_category = '지교'
+                original_type = '지교(전공인정)'
+            else:
+                actual_category = '전공'
+                original_type = None
+        else:
+            course_data = df[
+                (df['course_name'].str.contains(course, case=False, na=False)) &
+                (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필']))
+            ]
+            actual_category = '전공'
+            original_type = None
+        
+        if not course_data.empty:
+            if actual_category not in result['required_courses']:
+                result['required_courses'][actual_category] = []
+            result['required_courses'][actual_category].append({
+                'course_name': context.get_display_course_name(course),
+                'category': actual_category,
+                'credits': course_data['credits'].iloc[0],
+                'original_type': original_type or course_data['course_type'].iloc[0]
+            })
+            
+            # 지교로 이수한 전공과목이면 지교 카테고리에도 추가
+            if actual_category == '지교':
+                if '지교' not in result['required_courses']:
+                    result['required_courses']['지교'] = []
+                result['required_courses']['지교'].append({
+                    'course_name': context.get_display_course_name(course),
+                    'category': '지교',
+                    'credits': course_data['credits'].iloc[0],
+                    'original_type': original_type
+                })
+            return True
+        else:
+            if actual_category not in result['missing_courses']:
+                result['missing_courses'][actual_category] = []
+            result['missing_courses'][actual_category].append({
+                'course_name': context.get_display_course_name(course),
+                'category': actual_category,
+                'credits': context.get_course_credit(course)
+            })
+            return False
+
+    def _process_elective_course(self, course, is_designated, df, context):
+        """
+        전공선택 과목 처리를 위한 헬퍼 함수
+        """
+        if is_designated:
+            course_data = df[
+                (df['course_name'].str.contains(course, case=False, na=False)) &
+                (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필', '지정교양', '지교']))
+            ]
+            if not course_data.empty and course_data['course_type'].iloc[0] in ['지정교양', '지교']:
+                actual_category = '지교'
+                original_type = '지교(전공선택인정)'
+            else:
+                actual_category = '전공선택'
+                original_type = None
+        else:
+            course_data = df[
+                (df['course_name'].str.contains(course, case=False, na=False)) &
+                (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필']))
+            ]
+            actual_category = '전공선택'
+            original_type = None
+        
+        if not course_data.empty:
+            elective_info = {
+                'course_name': context.get_display_course_name(course),
+                'category': actual_category,
+                'credits': course_data['credits'].iloc[0],
+                'original_type': original_type or course_data['course_type'].iloc[0]
+            }
+            
+            # 지교로 이수한 과목에 대한 지교 카테고리 정보도 반환
+            if actual_category == '지교':
+                return elective_info, {
+                    'course_name': context.get_display_course_name(course),
+                    'category': '지교',
+                    'credits': course_data['credits'].iloc[0],
+                    'original_type': original_type
+                }
+            return elective_info, None
+        return None, None
 
     def analyze(self, df: pd.DataFrame, requirement: Any, student_type: str, context: AnalyzeContext):
         result = {
             'required_courses': {},
             'missing_courses': {},
         }
+        # 지교로 이수 가능한 과목 리스트 가져오기 (클래스 전체에서 공유)
+        designated_required = requirement.REQUIREMENTS[student_type].get('designated_required', [])
+        
+        # 전공 필수 과목 처리
         if 'major_required' in requirement.REQUIREMENTS[student_type]:
             major_required = requirement.REQUIREMENTS[student_type]['major_required']
-            major_required_as_designated = [
-                '철학의문제들',
-                '동양사상과현실문제',
-                '논리학'
-            ]
+            
             for course in major_required:
-                if course in major_required_as_designated:
-                    course_data = df[
-                        (df['course_name'].str.contains(course, case=False, na=False)) &
-                        (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필', '지정교양', '지교']))
-                    ]
-                    actual_category = '전공'
-                    if not course_data.empty and course_data['course_type'].iloc[0] in ['지정교양', '지교']:
-                        actual_category = '지교(전공인정)'
-                else:
-                    course_data = df[
-                        (df['course_name'].str.contains(course, case=False, na=False)) &
-                        (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필']))
-                    ]
-                    actual_category = '전공'
-                if not course_data.empty:
-                    if actual_category not in result['required_courses']:
-                        result['required_courses'][actual_category] = []
-                    result['required_courses'][actual_category].append({
-                        'course_name': context.get_display_course_name(course),
-                        'category': actual_category,
-                        'credits': course_data['credits'].iloc[0],
-                        'original_type': course_data['course_type'].iloc[0]
-                    })
-                else:
-                    if actual_category not in result['missing_courses']:
-                        result['missing_courses'][actual_category] = []
-                    result['missing_courses'][actual_category].append({
-                        'course_name': context.get_display_course_name(course),
-                        'category': actual_category,
-                        'credits': context.get_course_credit(course)
-                    })
-            # 전공 선택 필수 과목 체크 (2024년 요건)
-            if 'major_elective_required' in requirement.REQUIREMENTS[student_type]:
-                major_elective_required = requirement.REQUIREMENTS[student_type]['major_elective_required']
-                major_elective_min = requirement.REQUIREMENTS[student_type]['major_elective_min']
-                major_elective_as_designated = [
-                    '윤리학',
-                    '인식론',
-                    '한국철학의이해'
-                ]
-                completed_electives = []
-                for course in major_elective_required:
-                    if course in major_elective_as_designated:
-                        course_data = df[
-                            (df['course_name'].str.contains(course, case=False, na=False)) &
-                            (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필', '지정교양', '지교']))
-                        ]
-                        actual_category = '전공선택'
-                        if not course_data.empty and course_data['course_type'].iloc[0] in ['지정교양', '지교']:
-                            actual_category = '지교(전공선택인정)'
-                    else:
-                        course_data = df[
-                            (df['course_name'].str.contains(course, case=False, na=False)) &
-                            (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필']))
-                        ]
-                        actual_category = '전공선택'
-                    if not course_data.empty:
-                        completed_electives.append({
-                            'course_name': context.get_display_course_name(course),
-                            'category': actual_category,
-                            'credits': course_data['credits'].iloc[0],
-                            'original_type': course_data['course_type'].iloc[0]
-                        })
-                if len(completed_electives) >= major_elective_min:
+                self._process_course(course, course in designated_required, df, context, result)
+        
+        # 전공 선택 필수 과목 체크 (2024년 요건)
+        if 'major_elective_required' in requirement.REQUIREMENTS[student_type]:
+            major_elective_required = requirement.REQUIREMENTS[student_type]['major_elective_required']
+            major_elective_min = requirement.REQUIREMENTS[student_type]['major_elective_min']
+            
+            completed_electives = []
+            for course in major_elective_required:
+                elective_info, designated_info = self._process_elective_course(
+                    course, course in designated_required, df, context
+                )
+                
+                if elective_info:
+                    completed_electives.append(elective_info)
+                    
+                    # 지교로 이수한 과목이면 지교 카테고리에도 추가
+                    if designated_info:
+                        if '지교' not in result['required_courses']:
+                            result['required_courses']['지교'] = []
+                        result['required_courses']['지교'].append(designated_info)
+            
+            if len(completed_electives) >= major_elective_min:
+                if '전공선택' not in result['required_courses']:
+                    result['required_courses']['전공선택'] = []
+                result['required_courses']['전공선택'].extend(completed_electives)
+            else:
+                missing_count = major_elective_min - len(completed_electives)
+                missing_message = f"전공선택필수 과목 중 {missing_count}개 더 이수 필요"
+                if '전공선택' not in result['missing_courses']:
+                    result['missing_courses']['전공선택'] = []
+                result['missing_courses']['전공선택'].append({
+                    'course_name': missing_message,
+                    'category': '전공선택',
+                    'credits': missing_count * context.get_course_credit('전공선택')
+                })
+                if completed_electives:
                     if '전공선택' not in result['required_courses']:
                         result['required_courses']['전공선택'] = []
                     result['required_courses']['전공선택'].extend(completed_electives)
-                else:
-                    missing_count = major_elective_min - len(completed_electives)
-                    missing_message = f"전공선택필수 과목 중 {missing_count}개 더 이수 필요"
-                    if '전공선택' not in result['missing_courses']:
-                        result['missing_courses']['전공선택'] = []
-                    result['missing_courses']['전공선택'].append({
-                        'course_name': missing_message,
-                        'category': '전공선택',
-                        'credits': missing_count * context.get_course_credit('전공선택')
-                    })
-                    if completed_electives:
-                        if '전공선택' not in result['required_courses']:
-                            result['required_courses']['전공선택'] = []
-                        result['required_courses']['전공선택'].extend(completed_electives)
+        
         return result
 
 # --- 학술답사 분석기 ---
@@ -280,34 +337,45 @@ class Year2025RequirementAnalyzer:
         if 'major_base' in requirement.REQUIREMENTS[student_type]:
             major_base = requirement.REQUIREMENTS[student_type]['major_base']
             major_base_min = requirement.REQUIREMENTS[student_type]['major_base_min']
-            major_base_as_designated = [
-                '철학의문제들',
-                '동양사상과현실문제',
-                '논리학'
-            ]
+            # 지교로 이수 가능한 과목 리스트 가져오기
+            designated_required = requirement.REQUIREMENTS[student_type].get('designated_required', [])
+            
             completed_base = []
             for course in major_base:
-                if course in major_base_as_designated:
+                if course in designated_required:
                     course_data = df[
                         (df['course_name'] == course) &
                         (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필', '지정교양', '지교']))
                     ]
                     actual_category = '전공기초'
                     if not course_data.empty and course_data['course_type'].iloc[0] in ['지정교양', '지교']:
-                        actual_category = '지교(전공기초인정)'
-                else:
-                    course_data = df[
-                        (df['course_name'] == course) &
-                        (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필']))
-                    ]
-                    actual_category = '전공기초'
-                if not course_data.empty:
-                    completed_base.append({
-                        'course_name': context.get_display_course_name(course),
-                        'category': actual_category,
-                        'credits': course_data['credits'].iloc[0],
-                        'original_type': course_data['course_type'].iloc[0]
-                    })
+                        actual_category = '지교'
+                        original_type = '지교(전공기초인정)'
+                    else:
+                        course_data = df[
+                            (df['course_name'] == course) &
+                            (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필']))
+                        ]
+                        actual_category = '전공기초'
+                        original_type = None
+                    if not course_data.empty:
+                        completed_base.append({
+                            'course_name': context.get_display_course_name(course),
+                            'category': actual_category,
+                            'credits': course_data['credits'].iloc[0],
+                            'original_type': original_type or course_data['course_type'].iloc[0]
+                        })
+                        
+                        # 지교로 이수한 전공기초 과목이면 지교 카테고리에도 추가
+                        if actual_category == '지교':
+                            if '지교' not in result['required_courses']:
+                                result['required_courses']['지교'] = []
+                            result['required_courses']['지교'].append({
+                                'course_name': context.get_display_course_name(course),
+                                'category': '지교',
+                                'credits': course_data['credits'].iloc[0],
+                                'original_type': original_type
+                            })
             if len(completed_base) >= major_base_min:
                 if '전공기초' not in result['required_courses']:
                     result['required_courses']['전공기초'] = []
@@ -329,34 +397,46 @@ class Year2025RequirementAnalyzer:
         if 'major_elective' in requirement.REQUIREMENTS[student_type]:
             major_elective = requirement.REQUIREMENTS[student_type]['major_elective']
             major_elective_min = requirement.REQUIREMENTS[student_type]['major_elective_min']
-            major_elective_as_designated = [
-                '윤리학',
-                '인식론',
-                '한국철학의이해'
-            ]
+            # 지교로 이수 가능한 과목 리스트 가져오기
+            designated_required = requirement.REQUIREMENTS[student_type].get('designated_required', [])
+            
             completed_electives = []
             for course in major_elective:
-                if course in major_elective_as_designated:
+                if course in designated_required:
                     course_data = df[
                         (df['course_name'] == course) &
                         (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필', '지정교양', '지교']))
                     ]
                     actual_category = '전공선택'
+                    original_type = None
                     if not course_data.empty and course_data['course_type'].iloc[0] in ['지정교양', '지교']:
-                        actual_category = '지교(전공선택인정)'
+                        actual_category = '지교'
+                        original_type = '지교(전공선택인정)'
                 else:
                     course_data = df[
                         (df['course_name'] == course) &
                         (df['course_type'].isin(['전공선택', '전선', '전공필수', '전필']))
                     ]
                     actual_category = '전공선택'
+                    original_type = None
                 if not course_data.empty:
                     completed_electives.append({
                         'course_name': context.get_display_course_name(course),
                         'category': actual_category,
                         'credits': course_data['credits'].iloc[0],
-                        'original_type': course_data['course_type'].iloc[0]
+                        'original_type': original_type or course_data['course_type'].iloc[0]
                     })
+                    
+                    # 지교로 이수한 전공선택 과목이면 지교 카테고리에도 추가
+                    if actual_category == '지교':
+                        if '지교' not in result['required_courses']:
+                            result['required_courses']['지교'] = []
+                        result['required_courses']['지교'].append({
+                            'course_name': context.get_display_course_name(course),
+                            'category': '지교',
+                            'credits': course_data['credits'].iloc[0],
+                            'original_type': original_type
+                        })
             if len(completed_electives) >= major_elective_min:
                 if '전공선택' not in result['required_courses']:
                     result['required_courses']['전공선택'] = []

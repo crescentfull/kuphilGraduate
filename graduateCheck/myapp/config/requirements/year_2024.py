@@ -11,11 +11,15 @@ class Requirements2024(BaseRequirements):
         '지교': 5  # 문과대학 지정교양 과목 총 5개 이수 (철학과 지정교양 3개 포함)
     }
     
-    # 전공 필수 과목
-    MAJOR_REQUIRED = [
+    # 지교 필수 과목 (전공인정 가능한 지교 과목들)
+    DESIGNATED_REQUIRED = [
         '철학의문제들',
         '동양사상과현실문제',
-        '논리학',
+        '논리학'
+    ]
+    
+    # 전공 필수 과목
+    MAJOR_REQUIRED = [
         '서양철학고전읽기',
         '동양철학고전읽기',
         '서양고중세철학'  # 서양고대철학
@@ -46,6 +50,7 @@ class Requirements2024(BaseRequirements):
         'normal': {
             'total_credits': 124,
             'common_required': COMMON_REQUIRED,
+            'designated_required': DESIGNATED_REQUIRED,  # 지교 필수 과목 추가
             'major_required': MAJOR_REQUIRED,
             'major_elective_required': MAJOR_ELECTIVE_REQUIRED,
             'major_elective_min': MAJOR_ELECTIVE_MIN,
@@ -56,6 +61,7 @@ class Requirements2024(BaseRequirements):
         'transfer': {
             'total_credits': 65,
             'common_required': {},
+            'designated_required': DESIGNATED_REQUIRED,  # 지교 필수 과목 추가
             'major_required': ['서양고중세철학'],
             'major_elective_required': MAJOR_ELECTIVE_REQUIRED,
             'major_elective_min': 1,  # 학술답사 중 1개 이상
@@ -78,6 +84,7 @@ class Requirements2024(BaseRequirements):
             'common_required': {
                 '심교': ['철학산책']
             },
+            'designated_required': DESIGNATED_REQUIRED,  # 지교 필수 과목 추가
             'major_required': [],
             'major_elective_required': [
                 '서양고중세철학',
@@ -94,6 +101,7 @@ class Requirements2024(BaseRequirements):
         'minor': {
             'total_credits': 21,
             'common_required': {},
+            'designated_required': DESIGNATED_REQUIRED,  # 지교 필수 과목 추가
             'major_required': [
                 '철학의문제들',
                 '논리학'
