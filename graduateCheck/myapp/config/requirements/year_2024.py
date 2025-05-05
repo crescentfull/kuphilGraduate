@@ -45,34 +45,34 @@ class Requirements2024(BaseRequirements):
     
     MAJOR_ELECTIVE_MIN = 4  # 전공 선택 필수 과목 중 최소 이수 과목 수
     INTERNSHIP_REQUIRED = True  # 2017~2020학번 인턴십 의무
-    
+
     REQUIREMENTS = {
         'normal': {
             'total_credits': 124,
             'common_required': COMMON_REQUIRED,
-            'designated_required': DESIGNATED_REQUIRED,  # 지교 필수 과목 추가
+            'designated_required': DESIGNATED_REQUIRED,
             'major_required': MAJOR_REQUIRED,
             'major_elective_required': MAJOR_ELECTIVE_REQUIRED,
             'major_elective_min': MAJOR_ELECTIVE_MIN,
             'internship_required': INTERNSHIP_REQUIRED,
             'field_trip': FIELD_TRIP,
-            'field_trip_min': 2  # 학술답사 최소 이수 과목 수
+            'field_trip_min': 2
         },
         'transfer': {
             'total_credits': 65,
             'common_required': {},
-            'designated_required': DESIGNATED_REQUIRED,  # 지교 필수 과목 추가
+            'designated_required': DESIGNATED_REQUIRED,
             'major_required': ['서양고중세철학'],
             'major_elective_required': MAJOR_ELECTIVE_REQUIRED,
-            'major_elective_min': 1,  # 학술답사 중 1개 이상
-            'major_elective_courses': [  # 전공 선택 과목 (5개 중 3개 이상)
+            'major_elective_min': 1,
+            'major_elective_courses': [
                 '중국철학의이해',
                 '윤리학',
                 '서양근세철학',
                 '인식론',
                 '형이상학',
                 '한국철학의이해',
-                '중국유학'  # 유가철학
+                '중국유학'
             ],
             'major_elective_courses_min': 3,
             'field_trip': FIELD_TRIP,
@@ -84,7 +84,7 @@ class Requirements2024(BaseRequirements):
             'common_required': {
                 '심교': ['철학산책']
             },
-            'designated_required': DESIGNATED_REQUIRED,  # 지교 필수 과목 추가
+            'designated_required': DESIGNATED_REQUIRED,
             'major_required': [],
             'major_elective_required': [
                 '서양고중세철학',
@@ -101,7 +101,7 @@ class Requirements2024(BaseRequirements):
         'minor': {
             'total_credits': 21,
             'common_required': {},
-            'designated_required': DESIGNATED_REQUIRED,  # 지교 필수 과목 추가
+            'designated_required': DESIGNATED_REQUIRED,
             'major_required': [
                 '철학의문제들',
                 '논리학'
@@ -118,4 +118,11 @@ class Requirements2024(BaseRequirements):
             'major_elective_min': 3,
             'internship_required': False
         }
-    } 
+    }
+
+    @classmethod
+    def get_requirements(cls, student_type: str) -> dict:
+        """
+        BaseRequirements의 기본값을 받아온 뒤, student_type별 오버라이드를 적용합니다.
+        """
+        return super().get_requirements(student_type)  # base에서 모든 필드를 병합해줌 

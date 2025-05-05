@@ -1,6 +1,6 @@
 from django.shortcuts import render
 import pandas as pd
-from ..services.graduation.analyzer import GraduationAnalyzer
+from ..services.graduation.graduation_analyzer import GraduationAnalyzer
 
 def analyze_graduation(request):
     if request.method == 'POST':

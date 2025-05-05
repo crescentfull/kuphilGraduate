@@ -31,7 +31,8 @@ class GraduationRequirementManager:
             else:
                 requirement_class = self.requirements[2024]
 
-            return requirement_class()
+            # 연도별 설정을 병합하여 dict 형태로 반환
+            return requirement_class.get_requirements(student_type)
 
         except KeyError:
             return None 
