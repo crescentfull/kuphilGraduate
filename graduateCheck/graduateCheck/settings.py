@@ -13,7 +13,6 @@ import os
 
 from dotenv import load_dotenv
 from pathlib import Path
-import colorlog
 
 load_dotenv()
 
@@ -156,10 +155,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # 로깅 설정 추가
 LOGS_DIR = os.path.join(BASE_DIR, 'logs')
 
-# 로그 디렉토리가 없으면 생성
 if not os.path.exists(LOGS_DIR):
     os.makedirs(LOGS_DIR)
 
+# 기본 로깅 설정 (static dictionary)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -172,39 +171,20 @@ LOGGING = {
             'format': '{levelname} {message}',
             'style': '{',
         },
-        'colored': {
-            '()': 'colorlog.ColoredFormatter',
-            'format': '%(log_color)s%(levelname)s %(message)s',
-            'log_colors': {
-                'DEBUG': 'blue',
-                'INFO': 'green',
-                'WARNING': 'yellow',
-                'ERROR': 'red',
-                'CRITICAL': 'bold_red',
-            },
-        },
     },
     'handlers': {
-        'error_file': {
-            'level': 'ERROR',
+        'log_file': {
+            'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(LOGS_DIR, 'service.log'),
+            'filename': os.path.join(LOGS_DIR, 'logging.log'),
             'formatter': 'verbose',
-            'maxBytes': 10485760,  # 10MB
-            'backupCount': 5,      # 최대 5개 백업 파일 유지
+            'maxBytes': 10485760,
+            'backupCount': 5,
         },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
-        },
-        'service_file': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(LOGS_DIR, 'service.log'),
-            'formatter': 'verbose',
-            'maxBytes': 10485760,
-            'backupCount': 5,
         },
     },
     'loggers': {
@@ -214,12 +194,12 @@ LOGGING = {
             'propagate': True,
         },
         'django.request': {
-            'handlers': ['error_file'],
+            'handlers': ['log_file'],
             'level': 'ERROR',
             'propagate': False,
         },
         'myapp': {
-            'handlers': ['error_file', 'service_file', 'console'],
+            'handlers': ['log_file', 'console'],
             'level': 'DEBUG',
             'propagate': False,
         },

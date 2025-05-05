@@ -58,7 +58,7 @@ class GraduationAnalyzer:
             # F/N 학점 과목 수 디버그 로깅
             count_F = len(df[df['grade'] == 'F'])
             count_N = len(df[df['grade'] == 'N'])
-            logger.debug(f"F학점 과목 수: {count_F}, N학점 과목 수: {count_N}")
+            logger.info(f"F학점 과목 수: {count_F}, N학점 과목 수: {count_N}")
             if 'grade' in df.columns:
                 f_df = df[df['grade'].isin(['F', 'N'])]
                 for _, row in f_df.iterrows():
