@@ -6,6 +6,8 @@ class BaseRequirements:
     # 공통 필수과목 (심교, 지교 등)
     COMMON_REQUIRED = {}
     
+    DESIGNATED_REQUIRED = []
+    
     # 전공 필수과목
     MAJOR_REQUIRED = []
     
@@ -21,6 +23,7 @@ class BaseRequirements:
         return {
             'total_credits': cls.TOTAL_CREDITS,
             'common_required': cls.COMMON_REQUIRED,
+            'designated_required': cls.DESIGNATED_REQUIRED,
             'major_required': cls.MAJOR_REQUIRED,
             'major_elective_min': cls.MAJOR_ELECTIVE_MIN,
             'internship_required': cls.INTERNSHIP_REQUIRED

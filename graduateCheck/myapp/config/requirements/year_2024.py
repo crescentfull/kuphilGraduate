@@ -18,7 +18,7 @@ class Requirements2024(BaseRequirements):
         '논리학'
     ]
     
-    # 전공 필수 과목
+    # 전공 선택 중 필수 이수 과목
     MAJOR_REQUIRED = [
         '서양철학고전읽기',
         '동양철학고전읽기',
@@ -32,7 +32,7 @@ class Requirements2024(BaseRequirements):
         '학술답사Ⅲ'
     ]
     
-    # 전공 선택 필수 과목 (7개 중 4개 이상)
+    # 전공 선택 중 (7개 중 4개 이상) 필수 이수 과목
     MAJOR_ELECTIVE_REQUIRED = [
         '중국철학의이해',
         '윤리학',
