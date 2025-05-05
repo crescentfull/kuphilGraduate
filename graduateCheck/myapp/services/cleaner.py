@@ -1,4 +1,7 @@
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 def find_data_start_row(df: pd.DataFrame) -> int:
     """실제 데이터가 시작되는 행을 찾습니다."""
@@ -8,8 +11,9 @@ def find_data_start_row(df: pd.DataFrame) -> int:
             return idx
     raise ValueError("성적표 헤더를 찾을 수 없습니다.")
 
-def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+def clean_dataframe(df: pd.DataFrame):
     """성적표 데이터프레임 정제"""
+    logger.debug(f"Cleaning DataFrame with shape {df.shape}")
     try:
         columns_data = {
             'year': None,
@@ -91,7 +95,10 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
         original_count = len(new_df)
         if 'delete_type' in new_df.columns:
-            new_df = new_df[~new_df['delete_type'].astype(str).str.contains('취득학점포기')].copy()
+            filtered_df = new_df[~new_df['delete_type'].astype(str).str.contains('취득학점포기')]
+            deleted_count = original_count - len(filtered_df)
+            logger.debug(f"취득학점포기 과목 삭제: {deleted_count}개")
+            new_df = filtered_df.copy()
 
         if 'grade' in new_df.columns:
             pass
@@ -99,4 +106,5 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
         new_df = new_df.dropna(subset=['course_name', 'course_type', 'credits']).copy()
         return new_df
     except Exception as e:
+        logger.exception("Data cleaning error")
         raise 

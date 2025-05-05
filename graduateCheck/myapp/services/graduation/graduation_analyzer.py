@@ -7,7 +7,9 @@ from myapp.services.graduation.major_required import MajorRequiredAnalyzer
 from myapp.services.graduation.field_trip import FieldTripAnalyzer
 from myapp.services.graduation.year2025 import Year2025RequirementAnalyzer
 from myapp.models.graduation_requirement import GraduationRequirementManager
+import logging
 
+logger = logging.getLogger(__name__)
 
 class GraduationAnalyzer:
     def __init__(self):
@@ -41,18 +43,22 @@ class GraduationAnalyzer:
         self.field_trip_analyzer = FieldTripAnalyzer(self.course_name_mapping)
         self.year2025_requirement_analyzer = Year2025RequirementAnalyzer(self.course_name_mapping)
 
-    def analyze(self, df: pd.DataFrame, student_type: str, admission_year: int, internship_completed: str = 'no') -> Dict[str, Any]:
+    def analyze(self, df: pd.DataFrame, student_type: str, admission_year: int, internship_completed: str = 'no'):
         """졸업요건 분석 수행"""
         try:
             # 0. 원본 데이터의 총 학점 합계 확인
             original_total_credits = df['credits'].sum() if 'credits' in df.columns else 0
-            print(f"원본 데이터 총 학점: {original_total_credits}")
+            logger.info(f"원본 데이터 총 학점: {original_total_credits}")
             
             # 1. 데이터 정제
             df = clean_dataframe(df)
             
             # F학점 과목 추출
             f_grade_courses = []
+            # F/N 학점 과목 수 디버그 로깅
+            count_F = len(df[df['grade'] == 'F'])
+            count_N = len(df[df['grade'] == 'N'])
+            logger.debug(f"F학점 과목 수: {count_F}, N학점 과목 수: {count_N}")
             if 'grade' in df.columns:
                 f_df = df[df['grade'].isin(['F', 'N'])]
                 for _, row in f_df.iterrows():
@@ -66,7 +72,7 @@ class GraduationAnalyzer:
             
             # 1.5 정제 후 총 학점 확인
             cleaned_total_credits = df['credits'].sum()
-            print(f"정제 후 총 학점: {cleaned_total_credits}")
+            logger.debug(f"정제 후 총 학점: {cleaned_total_credits}")
             
             # 2. 과목명 매핑 적용
             df = self._apply_course_name_mapping(df)
@@ -76,7 +82,7 @@ class GraduationAnalyzer:
             
             # 3.5 매핑 후 총 학점 확인
             mapped_total_credits = df['credits'].sum()
-            print(f"매핑 후 총 학점: {mapped_total_credits}")
+            logger.debug(f"매핑 후 총 학점: {mapped_total_credits}")
             
             # 4. 졸업요건 가져오기
             requirement = self.requirement_manager.get_requirement(
@@ -94,13 +100,12 @@ class GraduationAnalyzer:
             
             # 7. 인턴십 이수 여부 추가
             result['internship_completed'] = internship_completed == 'yes'
-            print(f"인턴십 이수 여부: {result['internship_completed']}")
+            logger.info(f"인턴십 이수 여부: {result['internship_completed']}")
             
-            # 8. 2024학번까지는 인턴십 이수 여부 확인
-            if admission_year <= 2024 and not result['internship_completed']:
+            # 8. 인턴십이 필수인 경우(2017학번~2024학번) 이수 여부 확인
+            if requirement.internship_required and (2017 <= admission_year <= 2024) and not result['internship_completed']:
                 result['status'] = '미달'
-                result['missing_requirements'] = result.get('missing_requirements', [])
-                result['missing_requirements'].append('인턴십 미이수')
+                result.setdefault('missing_requirements', []).append('인턴십 미이수')
             result['f_grade_courses'] = f_grade_courses
             return result
         except Exception as e:
@@ -109,7 +114,7 @@ class GraduationAnalyzer:
                 'status': '오류',
             }
 
-    def _apply_course_name_mapping(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _apply_course_name_mapping(self, df: pd.DataFrame):
         df['course_name'] = df['course_name'].str.replace(' ', '')
         
         # 매핑 적용
@@ -118,18 +123,18 @@ class GraduationAnalyzer:
             df.loc[df['course_name'].str.contains(old_name, case=False, na=False), 'course_name'] = new_name
         return df
 
-    def _apply_course_type_mapping(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _apply_course_type_mapping(self, df: pd.DataFrame):
         for old_type, new_type in self.course_type_mapping.items():
             df.loc[df['course_type'] == old_type, 'course_type'] = new_type
         return df
 
-    def _analyze_requirements(self, df: pd.DataFrame, requirement: Any, student_type: str, admission_year: int, internship_completed: str = 'no') -> Dict[str, Any]:
+    def _analyze_requirements(self, df: pd.DataFrame, requirement: Any, student_type: str, admission_year: int, internship_completed: str = 'no'):
         """졸업요건 상세 분석"""
         valid_credits = df[
             (df['grade'].notna()) & 
             (~df['grade'].isin(['F', 'NP']))
         ]['credits'].sum() if 'grade' in df.columns else df['credits'].sum()
-        print(f"유효한 총 이수학점: {valid_credits}")
+        logger.info(f"유효한 총 이수학점: {valid_credits}")
         
         course_credits = {}
         for _, row in df.iterrows():
@@ -142,7 +147,7 @@ class GraduationAnalyzer:
                 elif course_name == new_name:
                     course_credits[old_name] = credits
 
-        def get_course_credit(course_name: str) -> int:
+        def get_course_credit(course_name: str):
             if '학술답사' in course_name:
                 return 1
             elif course_name in course_credits:
@@ -150,7 +155,7 @@ class GraduationAnalyzer:
             else:
                 return 3
 
-        def get_display_course_name(course_name: str) -> str:
+        def get_display_course_name(course_name: str):
             for old_name, new_name in self.course_name_mapping.items():
                 if course_name == new_name:
                     return f"{new_name}(전 {old_name})"
@@ -165,6 +170,7 @@ class GraduationAnalyzer:
             'status': '미졸업',
             'details': {}
         }
+        
         context = AnalyzeContext(
             get_display_course_name=get_display_course_name,
             get_course_credit=get_course_credit,
@@ -189,6 +195,7 @@ class GraduationAnalyzer:
             result['required_courses'].update(year2025_result['required_courses'])
             result['missing_courses'].update(year2025_result['missing_courses'])
 
-        if result['total_credits'] >= requirement['total_credits'] and len(result['missing_courses']) == 0:
+        # 졸업 가능 여부 판단
+        if result['total_credits'] >= requirement.total_credits and len(result['missing_courses']) == 0:
             result['status'] = '졸업가능'
         return result 

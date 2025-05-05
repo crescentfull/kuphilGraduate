@@ -1,18 +1,21 @@
 from typing import Any
 import pandas as pd
 from myapp.services.graduation.context import AnalyzeContext
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CommonRequiredAnalyzer:
     def __init__(self, course_name_mapping):
         self.course_name_mapping = course_name_mapping
 
-    def analyze(self, df: pd.DataFrame, requirement: Any, student_type: str, context: AnalyzeContext):
+    def analyze(self, df: pd.DataFrame, requirement, student_type: str, context: AnalyzeContext):
         result = {
             'required_courses': {},
             'missing_courses': {},
             'details': {}
         }
-        common_required = requirement['common_required']
+        common_required = requirement.common_required
         for category, courses in common_required.items():
             # --- 이수구분 그룹 확장 ---
             if category in ['심화교양', '심교', '핵심교양', '핵교']:
@@ -29,6 +32,7 @@ class CommonRequiredAnalyzer:
                 category_types = [category]
 
             if isinstance(courses, list):
+                logger.debug(f"Checking specific common courses for category {category}: {courses}")
                 for course in courses:
                     course_name = course
                     for old_name, new_name in self.course_name_mapping.items():
@@ -50,15 +54,18 @@ class CommonRequiredAnalyzer:
                     else:
                         if category not in result['missing_courses']:
                             result['missing_courses'][category] = []
+                        logger.warning(f"Missing common course: {course} in category {category}")
                         result['missing_courses'][category].append({
                             'course_name': context.get_display_course_name(course),
                             'category': category,
                             'credits': context.get_course_credit(course)
                         })
             elif isinstance(courses, int):
+                logger.debug(f"Checking count-based common requirement for category {category}: {courses}")
                 category_courses = df[df['course_type'].isin(category_types)]
                 completed_count = len(category_courses)
                 if completed_count >= courses:
+                    logger.info(f"Fulfilled common requirement '{category}' with {completed_count}/{courses}")
                     if category not in result['required_courses']:
                         result['required_courses'][category] = []
                     for _, row in category_courses.iterrows():
@@ -70,6 +77,7 @@ class CommonRequiredAnalyzer:
                         })
                     result['details'][f'{category} 과목 수'] = f'{completed_count}/{courses} (충족)'
                 else:
+                    logger.warning(f"Unfulfilled common requirement '{category}': {completed_count}/{courses}")
                     if category not in result['missing_courses']:
                         result['missing_courses'][category] = []
                     missing_count = courses - completed_count

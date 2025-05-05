@@ -13,6 +13,7 @@ import os
 
 from dotenv import load_dotenv
 from pathlib import Path
+import colorlog
 
 load_dotenv()
 
@@ -30,32 +31,23 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = True
 
 # ALLOWED_HOSTS 설정
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-if DEBUG:
-    ALLOWED_HOSTS.extend([
-        "localhost",
-        "127.0.0.1",
-        "0.0.0.0",
-        "[::1]",  # IPv6 localhost
-        "localhost:8000",
-        "127.0.0.1:8000"
-    ])
+ALLOWED_HOSTS = ["*"]
 
-# Render
-# Render는 기본적으로 https 사용
-SECURE_SSL_REDIRECT = not DEBUG  # 개발 환경에서는 False, 프로덕션에서는 True
+# # Render
+# # Render는 기본적으로 https 사용
+# SECURE_SSL_REDIRECT = not DEBUG  # 개발 환경에서는 False, 프로덕션에서는 True
 
-# HTTPS 설정
-if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_HSTS_SECONDS = 31536000  # 1년
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    X_FRAME_OPTIONS = 'DENY'
+# # HTTPS 설정
+# if not DEBUG:
+#     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#     SECURE_HSTS_SECONDS = 31536000  # 1년
+#     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+#     SECURE_HSTS_PRELOAD = True
+#     SECURE_CONTENT_TYPE_NOSNIFF = True
+#     SECURE_BROWSER_XSS_FILTER = True
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_SECURE = True
+#     X_FRAME_OPTIONS = 'DENY'
 
 # Application definition
 
@@ -180,20 +172,39 @@ LOGGING = {
             'format': '{levelname} {message}',
             'style': '{',
         },
+        'colored': {
+            '()': 'colorlog.ColoredFormatter',
+            'format': '%(log_color)s%(levelname)s %(message)s',
+            'log_colors': {
+                'DEBUG': 'blue',
+                'INFO': 'green',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
+                'CRITICAL': 'bold_red',
+            },
+        },
     },
     'handlers': {
         'error_file': {
-        'level': 'ERROR',
-        'class': 'logging.handlers.RotatingFileHandler',
-        'filename': os.path.join(LOGS_DIR, 'error.log'),
-        'formatter': 'verbose',
-        'maxBytes': 10485760,  # 10MB
-        'backupCount': 5,      # 최대 5개 백업 파일 유지
-    },
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'service.log'),
+            'formatter': 'verbose',
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 5,      # 최대 5개 백업 파일 유지
+        },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
+        },
+        'service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'service.log'),
+            'formatter': 'verbose',
+            'maxBytes': 10485760,
+            'backupCount': 5,
         },
     },
     'loggers': {
@@ -208,8 +219,8 @@ LOGGING = {
             'propagate': False,
         },
         'myapp': {
-            'handlers': ['error_file', 'console'],
-            'level': 'ERROR',
+            'handlers': ['error_file', 'service_file', 'console'],
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
