@@ -22,11 +22,11 @@
                             {{ result.status }}
                             <small class="text-muted">
                                 {% if student_type == 'normal' %}
-                                    (심화전공)
+                                    (원전공)
                                 {% elif student_type == 'transfer' %}
                                     (편입생)
                                 {% elif student_type == 'double' %}
-                                    (복수전공)
+                                    (다전공)
                                 {% elif student_type == 'minor' %}
                                     (부전공)
                                 {% endif %}
@@ -49,8 +49,8 @@
                                 {% for key, value in result.details.items %}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     {{ key }}
-                                    <span class="badge {% if '충족' in value %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
-                                        {{ value }}
+                                    <span class="badge {% if value.is_fulfilled %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                        {{ value.value }}
                                     </span>
                                 </li>
                                 {% endfor %}
@@ -70,15 +70,11 @@
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                                 <div class="d-flex align-items-center">
                                                     {{ course.course_name }}
-                                                    {% if category == '지교' and '전공' in course.original_type %}
-                                                        <span class="badge bg-success ms-2">전공인정</span>
+                                                    {% if '필수' in course.original_type %}
+                                                        <span class="badge bg-success ms-2">필수</span>
                                                     {% endif %}
-                                                    <small class="text-muted ms-2">({{ course.actual_type }})</small>
                                                 </div>
                                                 <div>
-                                                    {% if category == '지교' %}
-                                                        <span class="badge bg-info me-2">지교</span>
-                                                    {% endif %}
                                                     <span class="badge bg-primary rounded-pill">{{ course.credits }}학점</span>
                                                 </div>
                                             </li>
@@ -121,6 +117,7 @@
                         {% endif %}
                     </div>
 
+                    <!-- 미이수 필수 과목 -->
                     <div class="mb-4">
                         <h5 class="text-danger">미이수 필수 과목</h5>
                         {% if result.missing_courses %}
@@ -130,7 +127,12 @@
                                     <ul class="list-group">
                                         {% for course in courses %}
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                {{ course.course_name }}
+                                                <div class="d-flex align-items-center">
+                                                    {{ course.course_name }}
+                                                    {% if '필수' in course.original_type %}
+                                                        <span class="badge bg-success ms-2">필수</span>
+                                                    {% endif %}
+                                                </div>
                                                 <span class="badge bg-primary rounded-pill">{{ course.credits }}학점</span>
                                             </li>
                                         {% endfor %}

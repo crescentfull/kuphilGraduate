@@ -96,7 +96,7 @@ class Requirements2024(BaseRequirements):
             'common_required': {},
             'designated_required': [],
             'major_required': [],
-            'major_elective_required': 0,
+            'major_elective_required': [],
             'major_elective_min': 0,
             'internship_required': False
         }

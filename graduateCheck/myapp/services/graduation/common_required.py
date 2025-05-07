@@ -49,7 +49,7 @@ class CommonRequiredAnalyzer:
                             'course_name': context.get_display_course_name(course),
                             'category': category,
                             'credits': course_data['credits'].iloc[0],
-                            'original_type': course_data['course_type'].iloc[0]
+                            'original_type': "필수"
                         })
                     else:
                         logger.warning(f"과목 '{course}' 미이수")
@@ -69,13 +69,19 @@ class CommonRequiredAnalyzer:
                     if category not in result['required_courses']:
                         result['required_courses'][category] = []
                     for _, row in category_courses.iterrows():
+                        # 필수 과목인지 확인
+                        is_required = row['course_name'] in requirement.designated_required
                         result['required_courses'][category].append({
                             'course_name': context.get_display_course_name(row['course_name']),
                             'category': category,
                             'credits': row['credits'],
-                            'original_type': row['course_type']
+                            'original_type': "필수" if is_required else row['course_type']
                         })
-                    result['details'][f'{category} 과목 수'] = f'{completed_count}/{courses} (충족)'
+                    # result['details'][f'{category} 과목 수'] = f'{completed_count}/{courses} (충족)'
+                    result['details'][f'{category} 과목 수'] = {
+                            'value': f'{completed_count}/{courses}',
+                            'is_fulfilled': True
+                        }
                 else:
                     logger.warning(f"Unfulfilled common requirement '{category}': {completed_count}/{courses}")
                     if category not in result['missing_courses']:
@@ -90,11 +96,17 @@ class CommonRequiredAnalyzer:
                         if category not in result['required_courses']:
                             result['required_courses'][category] = []
                         for _, row in category_courses.iterrows():
+                            #필수 과목인지 확인
+                            is_required = row['course_name'] in requirement.designated_required
                             result['required_courses'][category].append({
                                 'course_name': context.get_display_course_name(row['course_name']),
                                 'category': category,
                                 'credits': row['credits'],
-                                'original_type': row['course_type']
+                                'original_type': "필수" if is_required else row['course_type']
                             })
-                    result['details'][f'{category} 과목 수'] = f'{completed_count}/{courses} (미충족)'
+                    # result['details'][f'{category} 과목 수'] = f'{completed_count}/{courses} (미충족)'
+                    result['details'][f'{category} 과목 수'] = {
+                            'value': f'{completed_count}/{courses}',
+                            'is_fulfilled': False
+                        }
         return result 

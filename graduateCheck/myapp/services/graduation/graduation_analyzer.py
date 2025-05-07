@@ -53,7 +53,7 @@ class GraduationAnalyzer:
             # 1. 데이터 정제
             df = clean_dataframe(df)
             
-            # F학점 과목 추출
+            # F/N 학점 과목 추출
             f_grade_courses = []
             # F/N 학점 과목 수 디버그 로깅
             count_F = len(df[df['grade'] == 'F'])
@@ -128,7 +128,7 @@ class GraduationAnalyzer:
         """졸업요건 상세 분석"""
         valid_credits = df[
             (df['grade'].notna()) & 
-            (~df['grade'].isin(['F', 'NP']))
+            (~df['grade'].isin(['F', 'N']))
         ]['credits'].sum() if 'grade' in df.columns else df['credits'].sum()
         logger.info(f"유효한 총 이수학점: {valid_credits}")
         
@@ -181,6 +181,7 @@ class GraduationAnalyzer:
         major_result = self.major_required_analyzer.analyze(df, requirement, student_type, context)
         result['required_courses'].update(major_result['required_courses'])
         result['missing_courses'].update(major_result['missing_courses'])
+        result['details'].update(major_result['details'])
 
         field_trip_result = self.field_trip_analyzer.analyze(df, requirement, student_type, context)
         result['required_courses'].update(field_trip_result['required_courses'])
