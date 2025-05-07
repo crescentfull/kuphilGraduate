@@ -65,16 +65,6 @@ class Requirements2024(BaseRequirements):
             'major_required': ['서양고중세철학'],
             'major_elective_required': MAJOR_ELECTIVE_REQUIRED,
             'major_elective_min': 1,
-            'major_elective_courses': [
-                '중국철학의이해',
-                '윤리학',
-                '서양근세철학',
-                '인식론',
-                '형이상학',
-                '한국철학의이해',
-                '중국유학'
-            ],
-            'major_elective_courses_min': 3,
             'field_trip': FIELD_TRIP,
             'field_trip_min': 1,
             'internship_required': False
@@ -86,15 +76,7 @@ class Requirements2024(BaseRequirements):
             },
             'designated_required': DESIGNATED_REQUIRED,
             'major_required': [],
-            'major_elective_required': [
-                '서양고중세철학',
-                '중국철학의이해',
-                '윤리학',
-                '인식론',
-                '서양근세철학',
-                '한국철학의이해',
-                '형이상학'
-            ],
+            'major_elective_required': MAJOR_ELECTIVE_REQUIRED,
             'major_elective_min': 4,
             'internship_required': False
         },
@@ -106,15 +88,7 @@ class Requirements2024(BaseRequirements):
                 '철학의문제들',
                 '논리학'
             ],
-            'major_elective_required': [
-                '중국철학의이해',
-                '윤리학',
-                '서양근세철학',
-                '인식론',
-                '형이상학',
-                '한국철학의이해',
-                '서양현대철학'
-            ],
+            'major_elective_required': MAJOR_ELECTIVE_REQUIRED,
             'major_elective_min': 3,
             'internship_required': False
         }

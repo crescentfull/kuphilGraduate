@@ -67,7 +67,7 @@ def clean_dataframe(df: pd.DataFrame):
             if (not pd.isna(row.iloc[columns_data['year']]) and 
                 not pd.isna(row.iloc[columns_data['course_type']]) and 
                 str(row.iloc[columns_data['course_type']]).strip() in 
-                ['전선', '전필', '기교', '지교','지필','다선','다필', '다지', '핵교', '일교', '일선', '심교', '전공선택', '전공필수', '기초교양', '지정교양', '핵심교양', '일반교양', '일반선택', '심화교양']):
+                ['전선', '전필', '기교', '지교','지필','다선','다필', '다지', '핵교', '일교', '일선', '심교']):
                 filtered_rows.append(i)
 
         for col_name, col_idx in columns_data.items():

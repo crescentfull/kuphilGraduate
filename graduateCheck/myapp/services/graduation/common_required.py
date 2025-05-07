@@ -17,19 +17,15 @@ class CommonRequiredAnalyzer:
         }
         common_required = requirement.common_required
         for category, courses in common_required.items():
-            # --- 이수구분 그룹 확장 ---
-            if category in ['심화교양', '심교', '핵심교양', '핵교']:
-                category_types = ['심화교양', '심교', '핵심교양', '핵교']
-            elif category in ['기초교양', '기교']:
-                category_types = ['기초교양', '기교']
-            elif category in ['일반교양', '일교']:
-                category_types = ['일반교양', '일교']
-            elif category in ['지정교양', '지교']:
-                category_types = ['지정교양', '지교']
-            elif category in ['일반선택', '일선']:
-                category_types = ['일반선택', '일선']
-            else:
-                category_types = [category]
+            # 공통 필수 과목 카테고리만 처리 (심교, 지교)
+            synonyms = {
+                '심교': ['심교', '핵교', '심화교양', '핵심교양'],
+                '지교': ['지교', '지정교양'],
+            }
+            # 심교와 지교 카테고리만 처리
+            if category not in synonyms:
+                continue
+            category_types = synonyms[category]
 
             if isinstance(courses, list):
                 logger.debug(f"Checking specific common courses for category {category}: {courses}")
