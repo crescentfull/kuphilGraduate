@@ -28,7 +28,10 @@ def analyze_graduation(request):
             if 'error' in result:
                 return render(request, 'upload.html', {'error': result['error']})
                 
-            return render(request, 'result.html', {'result': result})
+            return render(request, 'result.html', {
+                'result': result,
+                'student_type': student_type
+            })
             
         except Exception as e:
             return render(request, 'upload.html', {'error': str(e)})

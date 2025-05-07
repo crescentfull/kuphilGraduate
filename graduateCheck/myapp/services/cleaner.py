@@ -3,7 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def find_data_start_row(df: pd.DataFrame) -> int:
+def find_data_start_row(df: pd.DataFrame):
     """실제 데이터가 시작되는 행을 찾습니다."""
     for idx, row in df.iterrows():
         row_text = ''.join(str(cell) for cell in row if pd.notnull(cell))
@@ -37,7 +37,7 @@ def clean_dataframe(df: pd.DataFrame):
                 columns_data['year'] = col_idx
             elif col_idx == 3 and any('학기' in str(v) for v in col_values if not pd.isna(v)):
                 columns_data['semester'] = col_idx
-            elif col_idx == 8 and any(v in ['전선', '기교', '지교', '핵교', '일교', '일선'] for v in col_values if not pd.isna(v)):
+            elif col_idx == 8 and any(v in ['전선', '전필', '기교', '지교', '지필', '다선', '다필', '다지', '핵교', '일교', '일선', '심교'] for v in col_values if not pd.isna(v)):
                 columns_data['course_type'] = col_idx
             elif col_idx in range(17, 20) and any(len(str(v)) > 3 for v in col_values if not pd.isna(v)):
                 columns_data['course_name'] = col_idx

@@ -1,13 +1,23 @@
 from typing import Any
 import pandas as pd
 from myapp.services.graduation.context import AnalyzeContext
+import logging
+
+logger = logging.getLogger(__name__)
 
 # --- 2025년 요건 분석기 ---
 class Year2025RequirementAnalyzer:
     def __init__(self, course_name_mapping):
         self.course_name_mapping = course_name_mapping
 
-    def analyze(self, df: pd.DataFrame, requirement, student_type: str, context: AnalyzeContext) -> dict:
+    def analyze(self, df: pd.DataFrame, requirement, student_type: str, context: AnalyzeContext):
+        logger.info("=== 2025년도 졸업요건 분석 시작 ===")
+        logger.info(f"입력 데이터프레임 크기: {df.shape}")
+        logger.info(f"전공 기초 과목: {requirement.major_base}")
+        logger.info(f"전공 기초 최소 이수 과목 수: {requirement.major_base_min}")
+        logger.info(f"전공 선택 과목: {requirement.major_elective}")
+        logger.info(f"전공 선택 최소 이수 과목 수: {requirement.major_elective_min}")
+        
         result = {
             'required_courses': {},
             'missing_courses': {},
@@ -18,8 +28,10 @@ class Year2025RequirementAnalyzer:
         # 지교로 이수 가능한 과목 리스트
         designated_required = requirement.designated_required
         
+        logger.info("전공 기초 과목 확인 중...")
         completed_base = []
         for course in major_base:
+            logger.info(f"과목 '{course}' 확인 중...")
             if course in designated_required:
                 course_data = df[
                     (df['course_name'] == course) &
@@ -29,6 +41,7 @@ class Year2025RequirementAnalyzer:
                 if not course_data.empty and course_data['course_type'].iloc[0] in ['지정교양', '지교']:
                     actual_category = '지교'
                     original_type = '지교(전공기초인정)'
+                    logger.info(f"과목 '{course}' 지교로 이수 확인됨")
                 else:
                     course_data = df[
                         (df['course_name'] == course) &
@@ -37,6 +50,7 @@ class Year2025RequirementAnalyzer:
                     actual_category = '전공기초'
                     original_type = None
                 if not course_data.empty:
+                    logger.info(f"과목 '{course}' 이수 확인됨")
                     completed_base.append({
                         'course_name': context.get_display_course_name(course),
                         'category': actual_category,
@@ -54,11 +68,17 @@ class Year2025RequirementAnalyzer:
                             'credits': course_data['credits'].iloc[0],
                             'original_type': original_type
                         })
+            else:
+                logger.warning(f"과목 '{course}' 미이수")
+                
+        logger.info(f"이수한 전공 기초 과목 수: {len(completed_base)}/{major_base_min}")
         if len(completed_base) >= major_base_min:
+            logger.info("전공 기초 과목 요건 충족")
             if '전공기초' not in result['required_courses']:
                 result['required_courses']['전공기초'] = []
             result['required_courses']['전공기초'].extend(completed_base)
         else:
+            logger.warning(f"전공 기초 과목 요건 미충족: {len(completed_base)}/{major_base_min}")
             missing_count = major_base_min - len(completed_base)
             missing_message = f"전공기초 과목 중 {missing_count}개 더 이수 필요"
             if '전공기초' not in result['missing_courses']:

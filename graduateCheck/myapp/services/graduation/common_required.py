@@ -10,6 +10,10 @@ class CommonRequiredAnalyzer:
         self.course_name_mapping = course_name_mapping
 
     def analyze(self, df: pd.DataFrame, requirement, student_type: str, context: AnalyzeContext):
+        logger.info("=== 공통 필수 과목 분석 시작 ===")
+        logger.info(f"입력 데이터프레임 크기: {df.shape}")
+        logger.info(f"요구사항: {requirement.common_required}")
+        
         result = {
             'required_courses': {},
             'missing_courses': {},
@@ -26,35 +30,35 @@ class CommonRequiredAnalyzer:
             if category not in synonyms:
                 continue
             category_types = synonyms[category]
-
+            logger.info(f"카테고리 '{category}' 처리 중...")
+            logger.info(f"카테고리 타입: {category_types}")
+            
             if isinstance(courses, list):
-                logger.debug(f"Checking specific common courses for category {category}: {courses}")
+                logger.debug(f"Checking list-based common requirement for category {category}: {courses}")
                 for course in courses:
-                    course_name = course
-                    for old_name, new_name in self.course_name_mapping.items():
-                        if old_name == course:
-                            course_name = new_name
-                            break
+                    logger.info(f"과목 '{course}' 확인 중...")
                     course_data = df[
-                        (df['course_name'].str.contains(course, case=False, na=False)) & 
+                        (df['course_name'] == course) &
                         (df['course_type'].isin(category_types))
                     ]
                     if not course_data.empty:
+                        logger.info(f"과목 '{course}' 이수 확인됨")
                         if category not in result['required_courses']:
                             result['required_courses'][category] = []
                         result['required_courses'][category].append({
                             'course_name': context.get_display_course_name(course),
                             'category': category,
-                            'credits': course_data['credits'].iloc[0]
+                            'credits': course_data['credits'].iloc[0],
+                            'original_type': course_data['course_type'].iloc[0]
                         })
                     else:
+                        logger.warning(f"과목 '{course}' 미이수")
                         if category not in result['missing_courses']:
                             result['missing_courses'][category] = []
-                        logger.warning(f"Missing common course: {course} in category {category}")
                         result['missing_courses'][category].append({
                             'course_name': context.get_display_course_name(course),
                             'category': category,
-                            'credits': context.get_course_credit(course)
+                            'credits': context.get_course_credit(category)
                         })
             elif isinstance(courses, int):
                 logger.debug(f"Checking count-based common requirement for category {category}: {courses}")

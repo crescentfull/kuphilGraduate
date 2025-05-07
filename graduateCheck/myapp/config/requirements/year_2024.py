@@ -62,11 +62,22 @@ class Requirements2024(BaseRequirements):
             'total_credits': 65,
             'common_required': {},
             'designated_required': DESIGNATED_REQUIRED,
-            'major_required': ['서양고중세철학'],
-            'major_elective_required': MAJOR_ELECTIVE_REQUIRED,
-            'major_elective_min': 1,
+            'major_required': [
+                '서양고중세철학',
+                '중국철학의이해',
+                '서양근세철학',
+                '한국철학의이해',
+                ],
+            'major_elective_required': [
+                '윤리학',
+                '인식론',
+                '형이상학',
+                '서양현대철학',
+                '중국유학',
+            ],
+            'major_elective_min': 3,
             'field_trip': FIELD_TRIP,
-            'field_trip_min': 1,
+            'field_trip_min': 2,
             'internship_required': False
         },
         'double': {
@@ -81,21 +92,18 @@ class Requirements2024(BaseRequirements):
             'internship_required': False
         },
         'minor': {
-            'total_credits': 21,
+            'total_credits': 24,
             'common_required': {},
-            'designated_required': DESIGNATED_REQUIRED,
-            'major_required': [
-                '철학의문제들',
-                '논리학'
-            ],
-            'major_elective_required': MAJOR_ELECTIVE_REQUIRED,
-            'major_elective_min': 3,
+            'designated_required': [],
+            'major_required': [],
+            'major_elective_required': 0,
+            'major_elective_min': 0,
             'internship_required': False
         }
     }
 
     @classmethod
-    def get_requirements(cls, student_type: str) -> dict:
+    def get_requirements(cls, student_type: str):
         """
         BaseRequirements의 기본값을 받아온 뒤, student_type별 오버라이드를 적용합니다.
         """

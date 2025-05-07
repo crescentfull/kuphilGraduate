@@ -73,17 +73,14 @@ class GraduationAnalyzer:
             # 1.5 정제 후 총 학점 확인
             cleaned_total_credits = df['credits'].sum()
             logger.debug(f"정제 후 총 학점: {cleaned_total_credits}")
-            
             # 2. 과목명 매핑 적용
             df = self._apply_course_name_mapping(df)
-            
             # 3. 과목 구분 매핑 적용
             df = self._apply_course_type_mapping(df)
             
             # 3.5 매핑 후 총 학점 확인
             mapped_total_credits = df['credits'].sum()
             logger.debug(f"매핑 후 총 학점: {mapped_total_credits}")
-            
             # 4. 졸업요건 가져오기
             requirement = self.requirement_manager.get_requirement(
                 admission_year, 
@@ -103,7 +100,7 @@ class GraduationAnalyzer:
             logger.info(f"인턴십 이수 여부: {result['internship_completed']}")
             
             # 8. 인턴십이 필수인 경우(2017학번~2024학번) 이수 여부 확인
-            if requirement.internship_required and (2017 <= admission_year <= 2024) and not result['internship_completed']:
+            if requirement.internship_required and (2017 <= admission_year <= 2020) and not result['internship_completed']:
                 result['status'] = '미달'
                 result.setdefault('missing_requirements', []).append('인턴십 미이수')
             result['f_grade_courses'] = f_grade_courses
@@ -120,7 +117,6 @@ class GraduationAnalyzer:
         # 매핑 적용
         for old_name, new_name in self.course_name_mapping.items():
             df.loc[df['course_name'] == old_name, 'course_name'] = new_name
-            df.loc[df['course_name'].str.contains(old_name, case=False, na=False), 'course_name'] = new_name
         return df
 
     def _apply_course_type_mapping(self, df: pd.DataFrame):

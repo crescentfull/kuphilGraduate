@@ -18,7 +18,20 @@
                     </div>
                     {% else %}
                     <div class="alert {% if result.status == '졸업가능' %}alert-success{% else %}alert-danger{% endif %}">
-                        <h4 class="alert-heading">{{ result.status }}</h4>
+                        <h4 class="alert-heading">
+                            {{ result.status }}
+                            <small class="text-muted">
+                                {% if student_type == 'normal' %}
+                                    (심화전공)
+                                {% elif student_type == 'transfer' %}
+                                    (편입생)
+                                {% elif student_type == 'double' %}
+                                    (복수전공)
+                                {% elif student_type == 'minor' %}
+                                    (부전공)
+                                {% endif %}
+                            </small>
+                        </h4>
                         <p>총 이수학점: {{ result.total_credits }}학점</p>
                         {% if result.admission_year <= 2024 %}
                         <p>인턴십 의무 이수제: 
@@ -60,7 +73,7 @@
                                                     {% if category == '지교' and '전공' in course.original_type %}
                                                         <span class="badge bg-success ms-2">전공인정</span>
                                                     {% endif %}
-                                                    <small class="text-muted ms-2">({{ course.original_type }})</small>
+                                                    <small class="text-muted ms-2">({{ course.actual_type }})</small>
                                                 </div>
                                                 <div>
                                                     {% if category == '지교' %}
