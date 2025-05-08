@@ -205,3 +205,10 @@ LOGGING = {
         },
     },
 }
+
+# CSRF 설정
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+
+# CORS 설정
+CORS_ALLOW_ALL_ORIGINS = True  # 개발 환경에서만 사용
+CORS_ALLOW_CREDENTIALS = True
