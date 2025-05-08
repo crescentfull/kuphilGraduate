@@ -96,7 +96,7 @@ class MajorRequiredAnalyzer:
         is_fulfilled = completed_count >= min_required
         if is_fulfilled:
             logger.info("전공 선택 필수 과목 요건 충족")
-            result['required_courses'].setdefault(category, []).extend(completed_courses)
+            result['required_courses'].setdefault(category, []).extend(completed_major_required+completed_courses)
             result['details'][f'{category} 과목 수'] = {
                 'value': f'{completed_count}/{min_required}',
                 'is_fulfilled': True
@@ -105,7 +105,7 @@ class MajorRequiredAnalyzer:
             logger.warning(f"전공 선택 필수 과목 요건 미충족: {completed_count}/{min_required}")
             result['missing_courses'].setdefault(category, []).extend(missing_courses)
             if completed_courses:
-                result['required_courses'].setdefault(category, []).extend(completed_courses)
+                result['required_courses'].setdefault(category, []).extend(completed_major_required+completed_courses)
             result['details'][f'{category} 과목 수'] = {
                 'value': f'{completed_count}/{min_required}',
                 'is_fulfilled': False

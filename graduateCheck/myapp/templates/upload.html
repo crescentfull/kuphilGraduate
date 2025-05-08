@@ -85,4 +85,14 @@
         </div>
     </div>
 </div>
+
+{% include 'includes/modal.html' %}
+
+<script>
+    // 페이지 로드 시 모달 표시
+    document.addEventListener('DOMContentLoaded', function() {
+        var modal = new bootstrap.Modal(document.getElementById('fileUploadGuideModal'));
+        modal.show();
+    });
+</script>
 {% endblock %} 
