@@ -1,4 +1,3 @@
-from typing import Any
 import pandas as pd
 from myapp.services.graduation.context import AnalyzeContext
 
