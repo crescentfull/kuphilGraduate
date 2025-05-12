@@ -5,8 +5,11 @@ set -o errexit
 # Install Python dependencies
 pip install -r requirements.txt
 
+# Add the project directory to PYTHONPATH
+export PYTHONPATH=$PYTHONPATH:$(pwd)
+
 # Collect static files
-python manage.py collectstatic --no-input
+
 
 # Run database migrations
 python manage.py migrate 
