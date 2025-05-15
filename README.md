@@ -2,6 +2,11 @@
 
 이 프로젝트는 건국대학교 철학과 학생들의 졸업요건을 확인하고 관리할 수 있는 웹 애플리케이션입니다.
 
+
+## 분석프로그램 링크
+
+[https://kuphilgraduate.onrender.com/](https://kuphilgraduate.onrender.com/)
+
 ## 주요 기능
 
 - 입학년도별 졸업요건 확인
