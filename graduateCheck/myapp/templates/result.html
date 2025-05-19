@@ -32,7 +32,12 @@
                                 {% endif %}
                             </small>
                         </h4>
-                        <p>총 이수학점: {{ result.total_credits }}학점</p>
+                        <p>
+                            총 이수학점: {{ result.total_credits }}학점
+                            {% if result.remaining_credits is not None %}
+                                (남은 이수학점: {{ result.remaining_credits }}학점)
+                            {% endif %}
+                        </p>
                         {% if result.admission_year <= 2024 %}
                         <p>인턴십 의무 이수제: 
                             <span class="badge {% if result.internship_completed %}bg-success{% else %}bg-danger{% endif %}">

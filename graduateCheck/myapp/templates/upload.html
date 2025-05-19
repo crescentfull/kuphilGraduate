@@ -82,6 +82,43 @@
                     </form>
                 </div>
             </div>
+
+            <!-- 파일 업로드 안내문 -->
+            <div class="card mt-4">
+                <div class="card-header bg-light" role="button" data-bs-toggle="collapse" data-bs-target="#uploadGuide" aria-expanded="false" aria-controls="uploadGuide" style="cursor: pointer;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">📋 파일 업로드 안내</h5>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="collapse" id="uploadGuide">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">엑셀 파일 준비 방법</h6>
+                        <ol class="list-group list-group-numbered mb-3">
+                            <li class="list-group-item">포털시스템 로그인</li>
+                            <li class="list-group-item">학사정보시스템 > 학사 > 성적 > 전체성적</li>
+                            <li class="list-group-item">전체성적조회 > 출력 </li>
+                            <li class="list-group-item">출력 결과를 엑셀 파일(*.xlsx)로 다운로드</li>
+                        </ol>
+
+                        <h6 class="card-subtitle mb-2 text-muted">주의사항</h6>
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item">❗️<b>'철학과 내규 졸업요건'</b>만 체크하는 프로그램입니다.</li>
+                            <li class="list-group-item">✅ 반드시 포털시스템에서 다운로드한 원본 파일을 사용해주세요.</li>
+                            <li class="list-group-item">✅ 파일을 수정하거나 다른 형식으로 변환하지 마세요.</li>
+                            <li class="list-group-item">✅ 학번은 전체 9자리를 입력해주세요.</li>
+                            <li class="list-group-item">❌ 파일을 직접 수정하거나 내용을 변경하지 마세요.</li>
+                        </ul>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>도움이 필요하신가요?</strong>
+                            <p class="mb-0 mt-2">문의가 있으시다면 아래 연락처로 문의해주세요.</p>
+                            <p class="mb-0">📧 ohheeranda@gmail.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -93,6 +130,17 @@
     document.addEventListener('DOMContentLoaded', function() {
         var modal = new bootstrap.Modal(document.getElementById('fileUploadGuideModal'));
         modal.show();
+
+        // 드롭다운 아이콘 회전 애니메이션
+        document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function() {
+            const icon = this.querySelector('.bi-chevron-down');
+            icon.style.transition = 'transform 0.3s ease';
+            if (this.getAttribute('aria-expanded') === 'true') {
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
     });
 </script>
 {% endblock %} 

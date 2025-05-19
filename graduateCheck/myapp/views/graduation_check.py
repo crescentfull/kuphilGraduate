@@ -27,6 +27,16 @@ def analyze_graduation(request):
             
             if 'error' in result:
                 return render(request, 'upload.html', {'error': result['error']})
+            
+            # 남은 학점 계산
+            if student_type == 'normal':
+                result['remaining_credits'] = 124 - result['total_credits']
+            elif student_type == 'transfer':
+                result['remaining_credits'] = 65 - result['total_credits']
+            elif student_type == 'double':
+                result['remaining_credits'] = 40 - result['total_credits']
+            elif student_type == 'minor':
+                result['remaining_credits'] = 24 - result['total_credits']
                 
             return render(request, 'result.html', {
                 'result': result,
