@@ -1,6 +1,7 @@
 from django.shortcuts import render
 import pandas as pd
 from ..services.graduation.graduation_analyzer import GraduationAnalyzer
+from ..models.graduation_requirement import GraduationRequirementManager
 
 def analyze_graduation(request):
     if request.method == 'POST':
@@ -29,15 +30,10 @@ def analyze_graduation(request):
                 return render(request, 'upload.html', {'error': result['error']})
             
             # 남은 학점 계산
-            if student_type == 'normal':
-                result['remaining_credits'] = 124 - result['total_credits']
-            elif student_type == 'transfer':
-                result['remaining_credits'] = 65 - result['total_credits']
-            elif student_type == 'double':
-                result['remaining_credits'] = 40 - result['total_credits']
-            elif student_type == 'minor':
-                result['remaining_credits'] = 24 - result['total_credits']
-                
+            requirement_manager = GraduationRequirementManager()
+            requirement = requirement_manager.get_requirement(admission_year, student_type)
+            result['remaining_credits'] = max(0, requirement.total_credits - result['total_credits'])
+            
             return render(request, 'result.html', {
                 'result': result,
                 'student_type': student_type
