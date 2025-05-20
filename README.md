@@ -17,14 +17,14 @@
 
 ## Backlog
 - 취득학점확인원 엑셀 파일 분석기능(조교용)
-- 남은 학점 계산 후 표시
-- 헷갈릴 수 있으니 분석요건 명확하게 제시( 팝업창을 본능적으로 닫기를 누르는 경우가 다수, 분석 페이지에 띄워 놓아야 할듯)
+- 남은 학점 계산 후 표시 ✅
+- 헷갈릴 수 있으니 분석요건 명확하게 제시( 팝업창을 본능적으로 닫기를 누르는 경우가 다수, 분석 페이지에 띄워 놓아야 할듯) ✅
 
 ## 기술 스택
 
 - Backend: Django 5.1.2
 - Frontend: HTML, CSS, JavaScript, Bootstrap 5
-- Database: SQLite (개발 환경)
+- Database: SQLite (개발 환경) - 
 - 데이터 처리: Pandas, NumPy
 - 테스트: Pytest
 - 배포: Gunicorn, Render
