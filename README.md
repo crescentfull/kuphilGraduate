@@ -4,6 +4,7 @@
 
 
 ## 분석프로그램 링크
+![영상재생](https://github.com/user-attachments/assets/bd59b191-de4f-4697-b764-4b79ef4ea7ae)
 
 [https://kuphilgraduate.onrender.com/](https://kuphilgraduate.onrender.com/)
 
