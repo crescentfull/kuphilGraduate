@@ -22,7 +22,7 @@
                             <label for="student_id" class="form-label">학번</label>
                             <input type="text" class="form-control" id="student_id" name="student_id" 
                                    pattern="\d{9}" maxlength="9" required
-                                   placeholder="예: 201110207 (9자리 숫자)">
+                                   placeholder="예: 202200000 (9자리 숫자)">
                             <div class="form-text">입학년도가 포함된 9자리 학번을 입력하세요.</div>
                         </div>
 
@@ -40,7 +40,25 @@
                                     이수하지 않음
                                 </label>
                             </div>
-                            <div class="form-text">2024학번까지는 인턴십 의무 이수제가 적용됩니다.</div>
+                            <div class="form-text">
+                                2017~2020학번은 인턴십 의무 이수제가 적용됩니다.
+                                <i class="bi bi-exclamation-circle-fill text-info ms-1" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="top" 
+                                   data-bs-html="true"
+                                   data-bs-title="<strong>인턴십 의무 이수제 안내 (학칙시행세칙 제30조2)</strong><br><br>
+                                    <strong>📋 2017~2020학번:</strong><br>
+                                    • 현장실습형 과목 이수 또는<br>
+                                    • WE人역량인증 수료 또는<br>
+                                    • KU-GTEP 활동 수료 또는<br>
+                                    • 각 학과(부)/전공에서 별도로 정한 이수요건 충족<br><br>
+                                    <strong>📋 2021학번 이후:</strong><br>
+                                    • 현장실습형 과목 이수 또는<br>
+                                    • WE人역량인증 수료를 원칙으로 함<br><br>
+                                    <small>※ 자세한 사항은 학과 사무실에 문의</small>"
+                                   style="cursor: pointer;">
+                                </i>
+                            </div>
                         </div>
                         
                         <div class="mb-4">
@@ -107,7 +125,12 @@
                             <li class="list-group-item">✅ 반드시 포털시스템에서 다운로드한 원본 파일을 사용해주세요.</li>
                             <li class="list-group-item">✅ 파일을 수정하거나 다른 형식으로 변환하지 마세요.</li>
                             <li class="list-group-item">✅ 학번은 전체 9자리를 입력해주세요.</li>
-                            <li class="list-group-item">❌ 파일을 직접 수정하거나 내용을 변경하지 마세요.</li>
+                            <li class="list-group-item">✅ 취득학점확인원 파일(엑셀)도 가능합니다.</li>
+                            <li class="list-group-item">
+                                📋 <a href="https://philo.konkuk.ac.kr/philo/4059/subview.do" target="_blank" class="text-decoration-none">
+                                    건국대학교 철학과 졸업요건 확인하기 <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            </li>
                         </ul>
 
                         <div class="alert alert-info">
@@ -130,6 +153,12 @@
     document.addEventListener('DOMContentLoaded', function() {
         var modal = new bootstrap.Modal(document.getElementById('fileUploadGuideModal'));
         modal.show();
+
+        // Bootstrap 툴팁 초기화
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
 
         // 드롭다운 아이콘 회전 애니메이션
         document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function() {
