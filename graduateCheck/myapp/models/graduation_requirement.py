@@ -25,7 +25,7 @@ class GraduationRequirementManager:
             2025: Requirements2025
         }
 
-    def get_requirement(self, admission_year: int, student_type: str) -> Optional[YearRequirement]:
+    def get_requirement(self, admission_year: int, student_type: str):
         """입학년도와 학생 유형에 따른 졸업요건을 반환"""
         try:
             # 2025년 이후 입학생은 2025년 요건 적용

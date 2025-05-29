@@ -111,5 +111,5 @@ class MajorRequiredAnalyzer:
                 'is_fulfilled': False
             }
         
-        logger.info(f"전공 필수 과목 분석 완료: {result}")
+        logger.info(f"전공 필수 과목 분석 완료!!!!!!!!!!!!")
         return result
