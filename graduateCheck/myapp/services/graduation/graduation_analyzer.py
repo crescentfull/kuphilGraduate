@@ -1,6 +1,7 @@
 import pandas as pd
 from typing import Any
 from myapp.services.cleaner import clean_dataframe
+from myapp.services.cleaner2 import clean_dataframe_v2
 from myapp.services.graduation.context import AnalyzeContext
 from myapp.services.graduation.common_required import CommonRequiredAnalyzer
 from myapp.services.graduation.major_required import MajorRequiredAnalyzer
@@ -10,6 +11,24 @@ from myapp.models.graduation_requirement import GraduationRequirementManager
 import logging
 
 logger = logging.getLogger(__name__)
+
+def smart_clean_dataframe(df: pd.DataFrame):
+    """스마트 데이터 정제 - cleaner2를 먼저 시도하고 실패시 기존 cleaner 사용"""
+    try:
+        logger.info("cleaner2(FlexibleCleaner)로 데이터 정제 시도")
+        result = clean_dataframe_v2(df)
+        logger.info("cleaner2로 정제 성공")
+        return result
+    except Exception as e:
+        logger.warning(f"cleaner2 정제 실패: {str(e)}")
+        logger.info("기존 cleaner로 fallback 시도")
+        try:
+            result = clean_dataframe(df)
+            logger.info("기존 cleaner로 정제 성공")
+            return result
+        except Exception as e2:
+            logger.error(f"모든 cleaner 정제 실패: {str(e2)}")
+            raise ValueError(f"데이터 정제 실패 - cleaner2: {str(e)}, 기존 cleaner: {str(e2)}")
 
 class GraduationAnalyzer:
     def __init__(self):
@@ -50,8 +69,8 @@ class GraduationAnalyzer:
             original_total_credits = df['credits'].sum() if 'credits' in df.columns else 0
             logger.info(f"원본 데이터 총 학점: {original_total_credits}")
             
-            # 1. 데이터 정제
-            df = clean_dataframe(df)
+            # 1. 스마트 데이터 정제 (cleaner2 우선, 실패시 기존 cleaner)
+            df = smart_clean_dataframe(df)
             
             # F/N 학점 과목 추출
             f_grade_courses = []
